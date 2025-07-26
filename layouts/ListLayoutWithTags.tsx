@@ -32,36 +32,148 @@ function Pagination({ totalPages, currentPage }: PaginationProps) {
   const prevPage = currentPage - 1 > 0
   const nextPage = currentPage + 1 <= totalPages
 
+  // Generate page numbers to display
+  const getPageNumbers = () => {
+    const pages = []
+    const maxPagesToShow = 7
+    
+    if (totalPages <= maxPagesToShow) {
+      // Show all pages if total is small
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i)
+      }
+    } else {
+      // Always show first page
+      pages.push(1)
+      
+      let start = Math.max(2, currentPage - 2)
+      let end = Math.min(totalPages - 1, currentPage + 2)
+      
+      // Add ellipsis after first page if needed
+      if (start > 2) {
+        pages.push('...')
+      }
+      
+      // Add middle pages
+      for (let i = start; i <= end; i++) {
+        pages.push(i)
+      }
+      
+      // Add ellipsis before last page if needed
+      if (end < totalPages - 1) {
+        pages.push('...')
+      }
+      
+      // Always show last page
+      if (totalPages > 1) {
+        pages.push(totalPages)
+      }
+    }
+    
+    return pages
+  }
+
+  const handlePageInput = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      const target = e.target as HTMLInputElement
+      const pageNum = parseInt(target.value)
+      if (pageNum >= 1 && pageNum <= totalPages && pageNum !== currentPage) {
+        const url = pageNum === 1 ? `/${basePath}/` : `/${basePath}/page/${pageNum}`
+        window.location.href = url
+      }
+      target.value = ''
+    }
+  }
+
+  const pageNumbers = getPageNumbers()
+
   return (
-    <div className="space-y-2 pt-6 pb-8 md:space-y-5">
-      <nav className="flex justify-between">
-        {!prevPage && (
-          <button className="cursor-auto disabled:opacity-50" disabled={!prevPage}>
-            Previous
-          </button>
-        )}
-        {prevPage && (
+    <div className="space-y-4 pt-6 pb-8 md:space-y-5">
+      {/* Main pagination navigation */}
+      <nav className="flex items-center justify-center space-x-1">
+        {/* Previous button */}
+        {prevPage ? (
           <Link
             href={currentPage - 1 === 1 ? `/${basePath}/` : `/${basePath}/page/${currentPage - 1}`}
             rel="prev"
+            className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-300"
           >
             Previous
           </Link>
+        ) : (
+          <button 
+            disabled 
+            className="px-3 py-2 text-sm font-medium text-gray-300 bg-white border border-gray-300 rounded-md cursor-not-allowed dark:bg-gray-800 dark:border-gray-600 dark:text-gray-600"
+          >
+            Previous
+          </button>
         )}
-        <span>
-          {currentPage} of {totalPages}
-        </span>
-        {!nextPage && (
-          <button className="cursor-auto disabled:opacity-50" disabled={!nextPage}>
+
+        {/* Page numbers */}
+        {pageNumbers.map((page, index) => {
+          if (page === '...') {
+            return (
+              <span key={`ellipsis-${index}`} className="px-3 py-2 text-sm font-medium text-gray-500 dark:text-gray-400">
+                ...
+              </span>
+            )
+          }
+          
+          const pageNum = page as number
+          const isCurrentPage = pageNum === currentPage
+          
+          return (
+            <Link
+              key={pageNum}
+              href={pageNum === 1 ? `/${basePath}/` : `/${basePath}/page/${pageNum}`}
+              className={`px-3 py-2 text-sm font-medium rounded-md ${
+                isCurrentPage
+                  ? 'text-white bg-primary-500 border border-primary-500'
+                  : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-300'
+              }`}
+            >
+              {pageNum}
+            </Link>
+          )
+        })}
+
+        {/* Next button */}
+        {nextPage ? (
+          <Link
+            href={`/${basePath}/page/${currentPage + 1}`}
+            rel="next"
+            className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-300"
+          >
+            Next
+          </Link>
+        ) : (
+          <button 
+            disabled 
+            className="px-3 py-2 text-sm font-medium text-gray-300 bg-white border border-gray-300 rounded-md cursor-not-allowed dark:bg-gray-800 dark:border-gray-600 dark:text-gray-600"
+          >
             Next
           </button>
         )}
-        {nextPage && (
-          <Link href={`/${basePath}/page/${currentPage + 1}`} rel="next">
-            Next
-          </Link>
-        )}
       </nav>
+
+      {/* Page info and direct navigation */}
+      <div className="flex items-center justify-center space-x-4 text-sm text-gray-500 dark:text-gray-400">
+        <span>
+          Page {currentPage} of {totalPages}
+        </span>
+        <div className="flex items-center space-x-2">
+          <span>Go to page:</span>
+          <input
+            type="number"
+            min="1"
+            max={totalPages}
+            placeholder="1"
+            onKeyPress={handlePageInput}
+            className="w-16 px-2 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300"
+          />
+          <span className="text-xs text-gray-400">(Press Enter)</span>
+        </div>
+      </div>
     </div>
   )
 }
