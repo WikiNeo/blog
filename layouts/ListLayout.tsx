@@ -33,9 +33,9 @@ function Pagination({ totalPages, currentPage }: PaginationProps) {
 
   // Generate page numbers to display
   const getPageNumbers = () => {
-    const pages = []
+    const pages: (number | string)[] = []
     const maxPagesToShow = 7
-    
+
     if (totalPages <= maxPagesToShow) {
       // Show all pages if total is small
       for (let i = 1; i <= totalPages; i++) {
@@ -44,31 +44,31 @@ function Pagination({ totalPages, currentPage }: PaginationProps) {
     } else {
       // Always show first page
       pages.push(1)
-      
-      let start = Math.max(2, currentPage - 2)
-      let end = Math.min(totalPages - 1, currentPage + 2)
-      
+
+      const start = Math.max(2, currentPage - 2)
+      const end = Math.min(totalPages - 1, currentPage + 2)
+
       // Add ellipsis after first page if needed
       if (start > 2) {
         pages.push('...')
       }
-      
+
       // Add middle pages
       for (let i = start; i <= end; i++) {
         pages.push(i)
       }
-      
+
       // Add ellipsis before last page if needed
       if (end < totalPages - 1) {
         pages.push('...')
       }
-      
+
       // Always show last page
       if (totalPages > 1) {
         pages.push(totalPages)
       }
     }
-    
+
     return pages
   }
 
@@ -95,14 +95,14 @@ function Pagination({ totalPages, currentPage }: PaginationProps) {
           <Link
             href={currentPage - 1 === 1 ? `/${basePath}/` : `/${basePath}/page/${currentPage - 1}`}
             rel="prev"
-            className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-300"
+            className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-500 hover:bg-gray-50 hover:text-gray-700 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-300"
           >
             Previous
           </Link>
         ) : (
-          <button 
-            disabled 
-            className="px-3 py-2 text-sm font-medium text-gray-300 bg-white border border-gray-300 rounded-md cursor-not-allowed dark:bg-gray-800 dark:border-gray-600 dark:text-gray-600"
+          <button
+            disabled
+            className="cursor-not-allowed rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-600"
           >
             Previous
           </button>
@@ -112,23 +112,26 @@ function Pagination({ totalPages, currentPage }: PaginationProps) {
         {pageNumbers.map((page, index) => {
           if (page === '...') {
             return (
-              <span key={`ellipsis-${index}`} className="px-3 py-2 text-sm font-medium text-gray-500 dark:text-gray-400">
+              <span
+                key={`ellipsis-${index}`}
+                className="px-3 py-2 text-sm font-medium text-gray-500 dark:text-gray-400"
+              >
                 ...
               </span>
             )
           }
-          
+
           const pageNum = page as number
           const isCurrentPage = pageNum === currentPage
-          
+
           return (
             <Link
               key={pageNum}
               href={pageNum === 1 ? `/${basePath}/` : `/${basePath}/page/${pageNum}`}
-              className={`px-3 py-2 text-sm font-medium rounded-md ${
+              className={`rounded-md px-3 py-2 text-sm font-medium ${
                 isCurrentPage
-                  ? 'text-white bg-primary-500 border border-primary-500'
-                  : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-300'
+                  ? 'bg-primary-500 border-primary-500 border text-white'
+                  : 'border border-gray-300 bg-white text-gray-500 hover:bg-gray-50 hover:text-gray-700 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-300'
               }`}
             >
               {pageNum}
@@ -141,14 +144,14 @@ function Pagination({ totalPages, currentPage }: PaginationProps) {
           <Link
             href={`/${basePath}/page/${currentPage + 1}`}
             rel="next"
-            className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-300"
+            className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-500 hover:bg-gray-50 hover:text-gray-700 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-300"
           >
             Next
           </Link>
         ) : (
-          <button 
-            disabled 
-            className="px-3 py-2 text-sm font-medium text-gray-300 bg-white border border-gray-300 rounded-md cursor-not-allowed dark:bg-gray-800 dark:border-gray-600 dark:text-gray-600"
+          <button
+            disabled
+            className="cursor-not-allowed rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-600"
           >
             Next
           </button>
@@ -168,7 +171,7 @@ function Pagination({ totalPages, currentPage }: PaginationProps) {
             max={totalPages}
             placeholder="1"
             onKeyPress={handlePageInput}
-            className="w-16 px-2 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300"
+            className="focus:ring-primary-500 w-16 rounded-md border border-gray-300 px-2 py-1 text-sm focus:border-transparent focus:ring-2 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300"
           />
           <span className="text-xs text-gray-400">(Press Enter)</span>
         </div>
