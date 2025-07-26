@@ -1,0 +1,11 @@
+---
+title: "Start SSH Agent"
+tags: [Network]
+date: 2020-08-06
+summary: ssh-add -K ~/.
+---
+
+```shell
+eval "$(ssh-agent -s)"
+ssh-add -K ~/.ssh/id_rsa
+```

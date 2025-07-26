@@ -1,0 +1,46 @@
+---
+title: 'Database Normalization: 1NF'
+tags: [Database]
+date: 2025-07-24
+---
+
+**Database normalization** is the process of structuring a relational database to reduce redundancy and improve data integrity. It involves dividing large tables into smaller, related tables and defining relationships between them. The goal is to organize data efficiently while preserving its consistency.
+
+---
+
+### 🔹 **First Normal Form (1NF)**
+
+A table is in **First Normal Form (1NF)** if:
+
+1. **All columns contain only atomic (indivisible) values.**
+2. **Each record is unique and identifiable by a primary key.**
+3. **Each field contains only one value per record (no repeating groups or arrays).**
+
+---
+
+### ✅ Example of a table **NOT** in 1NF
+
+| OrderID | CustomerName | ItemsPurchased         |
+| ------- | ------------ | ---------------------- |
+| 1       | Alice        | Apple, Banana          |
+| 2       | Bob          | Orange                 |
+| 3       | Alice        | Banana, Carrot, Orange |
+
+- ❌ `ItemsPurchased` contains **multiple values** → not atomic.
+
+---
+
+### ✅ Conversion to 1NF
+
+| OrderID | CustomerName | ItemPurchased |
+| ------- | ------------ | ------------- |
+| 1       | Alice        | Apple         |
+| 1       | Alice        | Banana        |
+| 2       | Bob          | Orange        |
+| 3       | Alice        | Banana        |
+| 3       | Alice        | Carrot        |
+| 3       | Alice        | Orange        |
+
+- ✅ Now each field contains a **single value**, and the table is in **1NF**.
+
+---

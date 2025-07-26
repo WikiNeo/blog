@@ -1,0 +1,70 @@
+---
+title: 'Content Security Policy'
+tags: [Network]
+date: 2025-07-25
+---
+
+**Content Security Policy (CSP)** is a security feature implemented in web browsers to prevent attacks like **Cross-Site Scripting (XSS)**, **clickjacking**, and other **code injection attacks** by restricting the sources from which content can be loaded.
+
+---
+
+### 🔐 What CSP Does
+
+CSP lets you **whitelist trusted content sources** (like scripts, styles, images) and **block everything else** by default.
+
+---
+
+### 🛡️ Example
+
+Here’s a CSP header that allows scripts only from the same origin and from a trusted CDN:
+
+```http
+Content-Security-Policy: default-src 'self'; script-src 'self' https://cdn.example.com
+```
+
+This means:
+
+- All content must come from the site itself (`'self'`)
+- Scripts are allowed only from `'self'` and `cdn.example.com`
+- Other sources (e.g., inline scripts or third-party scripts) will be blocked
+
+---
+
+### ✍️ How CSP Is Set
+
+You can define it:
+
+1. In the HTTP response header:
+
+   ```http
+   Content-Security-Policy: default-src 'self'
+   ```
+
+2. Or in a `<meta>` tag in HTML:
+
+   ```html
+   <meta http-equiv="Content-Security-Policy" content="default-src 'self'" />
+   ```
+
+---
+
+### 🔧 Common Directives
+
+| Directive         | What it Controls                  | Example Value                      |
+| ----------------- | --------------------------------- | ---------------------------------- |
+| `default-src`     | Default for all content types     | `'self'`                           |
+| `script-src`      | JavaScript sources                | `'self'` `https://apis.google.com` |
+| `style-src`       | CSS sources                       | `'self'` `'unsafe-inline'`         |
+| `img-src`         | Image sources                     | `*` or specific domains            |
+| `connect-src`     | AJAX, WebSocket, etc.             | `'self'` `api.example.com`         |
+| `frame-ancestors` | Who can embed your page in iframe | `'none'`, `'self'`                 |
+
+---
+
+### ⚠️ Warnings
+
+- Using `'unsafe-inline'` or `'unsafe-eval'` weakens your policy
+- Poor CSP can break functionality (e.g., inline scripts being blocked)
+- CSP **is not a silver bullet**—it should be used alongside other best practices
+
+---

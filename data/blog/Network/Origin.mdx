@@ -1,0 +1,46 @@
+---
+title: "Origin"
+tags: [Network]
+date: 2022-11-26
+summary: and port of the URL used to access it.
+---
+
+Web content's **origin** is defined by the scheme (protocol), hostname (domain),
+and port of the URL used to access it. Two objects have the same origin only
+when the scheme, hostname, and port all match.
+
+Some operations are restricted to same-origin content, and this restriction
+can be lifted using CORS.
+
+## Examples
+
+These are same origin because they have the same scheme (`http`) and hostname
+(`example.com`), and the different file path does not matter:
+
+- https://example.com/app1/index.html
+- https://example.com/app2/index.html
+
+These are same origin because a server delivers HTTP content through port 80 by default:
+
+- https://Example.com:80
+- https://example.com
+
+These are not same origin because they use different schemes:
+
+- https://example.com/app1
+- https://example.com/app2
+
+These are not same origin because they use different hostnames:
+
+- https://example.com
+- https://www.example.com
+- https://myapp.example.com
+
+These are not same origin because they use different ports:
+
+- https://example.com
+- https://example.com:8080
+
+## Reference
+
+- [https://developer.mozilla.org/en-US/docs/Glossary/Origin](https://developer.mozilla.org/en-US/docs/Glossary/Origin)

@@ -1,0 +1,41 @@
+---
+title: "Docker Clean-Up"
+tags: [Docker]
+date: 2020-08-06
+summary: 
+---
+
+## Image
+
+### Remove images
+
+```bash
+docker rmi name
+docker image rm name
+```
+
+### Remove untagged images
+
+```bash
+docker rmi $(docker images | grep "^<none>" | awk "{print $3}")
+```
+
+## Cointainer
+
+### List exited containers
+
+```bash
+docker ps -a -f status=exited
+```
+
+### List exited container IDs
+
+```bash
+docker ps -a -f status=exited -q
+```
+
+### Remove exited containers
+
+```bash
+docker rm $(docker ps -a -f status=exited -q)
+```

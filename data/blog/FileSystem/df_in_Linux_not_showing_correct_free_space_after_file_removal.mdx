@@ -1,0 +1,16 @@
+---
+title: "df in Linux not showing correct free space after file removal"
+tags: [FileSystem]
+date: 2020-08-24
+summary: Deleting the filename doesn't actually delete the file.
+---
+
+Deleting the filename doesn't actually delete the file. Some other process is holding the
+file open, causing it to not to be deleted; restart ot kill that process to release the
+file.
+
+Use
+```
+lsof +L1
+```
+to find our which process is using a deleted (unlinked) file.

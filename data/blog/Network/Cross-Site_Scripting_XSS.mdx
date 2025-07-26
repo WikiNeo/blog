@@ -1,0 +1,46 @@
+---
+title: 'Cross-Site Scripting (XSS)'
+tags: [Network]
+date: 2022-11-23
+---
+
+**XSS (Cross-Site Scripting)** is a type of security vulnerability found in web applications. It allows attackers to inject malicious scripts (usually JavaScript) into content that is then viewed by other users.
+
+### There are three main types of XSS
+
+1. **Stored XSS**: The malicious script is permanently stored on the target server (e.g., in a comment field or user profile). When another user views the page, the script runs in their browser.
+2. **Reflected XSS**: The script is part of the request (like a URL parameter) and is immediately reflected back in the server response. It only runs when a user clicks a specially crafted link.
+3. **DOM-based XSS**: The vulnerability exists in the client-side code (JavaScript). It manipulates the DOM in an unsafe way using user input.
+
+### Example
+
+```html
+<!-- Vulnerable code -->
+<p>Hello, <span id="name"></span>!</p>
+<script>
+  const params = new URLSearchParams(location.search)
+  document.getElementById('name').innerHTML = params.get('user')
+</script>
+```
+
+If a user visits:
+
+```
+example.com/?user=<script>alert('XSS')</script>
+```
+
+The script runs in their browser — a basic example of DOM-based XSS.
+
+### Risks
+
+- Stealing session cookies
+- Defacing websites
+- Redirecting users
+- Delivering malware
+
+### Prevention
+
+- Escape or sanitize user input
+- Use HTTP-only cookies
+- Use Content Security Policy (CSP)
+- Prefer safe APIs like `textContent` over `innerHTML`

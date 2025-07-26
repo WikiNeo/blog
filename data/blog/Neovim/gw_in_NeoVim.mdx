@@ -1,0 +1,17 @@
+---
+title: "gw in NeoVim"
+tags: [Neovim]
+date: 2024-07-22
+summary: Format the lines that `{motion}` moves over.
+---
+
+- `gw{motion}`
+  - Format the lines that `{motion}` moves over. Similar to `gq` but puts the
+    cursor back at the same position in the text. However, `formatprg' and
+`formatexpr` are not used.
+- `gwgw` or `gww`
+
+  - Format the current line as with `gw`.
+
+- `{Visual}gw`
+  - Format the highlighted text as with `gw`.

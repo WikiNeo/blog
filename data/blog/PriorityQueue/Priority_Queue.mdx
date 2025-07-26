@@ -1,0 +1,45 @@
+---
+title: 'Priority Queue'
+tags: [PriorityQueue]
+date: 2022-09-01
+---
+
+In computer science, a **priority queue** is an abstract data-type similar to a
+regular queue or stack data structure in which each element additionally has a
+_priority_ associated with it. In a priority queue, an element with high
+priority is served before an element with low priority. In some
+implementations, if two elements have the same priority, they are served
+according to the order in which they were enqueued; in other implementations
+ordering of elements with the same priority remains undefined.
+
+While coders often implement priority queues with heaps, they are conceptually
+distinct from heaps. A priority queue is a concept like a list or a map; just
+as a list can be implemented with a linked list or with an array, a priority
+queue can be implemented with a heap or with a variety of other methods such
+as an unordered array.
+
+## Operations
+
+A priority queue must at least support the following operations:
+
+- _is_empty_: check whether the queue has no elements.
+- _insert_with_priority_: add an element to the queue with an associated priority.
+- _pull_highest_priority_element_: remove the element from the queue that has
+  the highest priority, and return it.
+  - This is also known as "_pop_element(Off)_", "_get_maximum_element_" or "_get_front(most)\_element_".
+  - Some conventions reverse the order of priorities, considering lower values to be higher priority, so this may also be known as "_get_minimum_element_", and is often referred to as "_get-min_" in the literature.
+  - This may instead be specified as separate "_peek_at_highest_priority_element_" and "_delete_element_" functions, which can be combined to produce "_pull_highest_priority_element_".
+
+In addition, _peek_ (in this context often called _find-max_ or _find-min_), which returns the highest-priority element but does not modify the queue, is very frequently implemented, and nearly always executes in O(1) time. This operation and its O(1) performance is crucial to many applications of priority queues.
+
+More advanced implementations may support more complicated operations, such as
+_pull_lowest_priority_element_, inspecting the first few highest- or
+lowest-priority elements, clearing the queue, clearing subsets of the queue,
+performing a batch insert, merging two or more queues into one, incrementing
+priority of any element, etc.
+
+Stacks and queues are different than priority queues. In a priority queue, the ordering is intrinsic: it depends on the value being inserted. In a stack or queue, the ordering is extrinsic: it depends on the order in which the value is inserted. In terms of behavioral subtyping, a queue is not a subtype of a priority queue, and a priority queue is not a subtype of a queue. Neither one can be substituted for the other, nor should either one be a subtype of the other in an inheritance hierarchy.
+
+## Reference
+
+- [https://en.wikipedia.org/wiki/Priority_queue](https://en.wikipedia.org/wiki/Priority_queue)
