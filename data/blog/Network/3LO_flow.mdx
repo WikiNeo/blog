@@ -1,0 +1,63 @@
+---
+title: '3LO Flow'
+tags: [Network]
+date: 2025-07-27
+summary: "The **3LO flow** (Three-Legged OAuth flow) is an OAuth 2.0 authorization flow used to allow applications to access user data on their behalf with **user consent**. It's commonly used by APIs like Google, GitHub, and others when the application needs access to a user's private resources (e.g., calendar, email, files)."
+---
+
+The **3LO flow** (Three-Legged OAuth flow) is an OAuth 2.0 authorization flow used to allow applications to access user data on their behalf with **user consent**. It's commonly used by APIs like Google, GitHub, and others when the application needs access to a user's private resources (e.g., calendar, email, files).
+
+---
+
+### 🔁 Steps in the 3LO Flow
+
+1. **User Authorization Request**
+   Your application redirects the user to the authorization server (e.g., `accounts.google.com`) with:
+
+   - Client ID
+   - Redirect URI
+   - Requested scopes
+   - State (optional for CSRF protection)
+
+2. **User Grants Consent**
+   The user logs in (if not already) and **grants or denies** permission to your app to access their resources.
+
+3. **Authorization Code Received**
+   If the user grants access, the auth server redirects the user **back to your app's redirect URI** with an **authorization code**.
+
+4. **Exchange Code for Tokens**
+   Your app’s backend sends a POST request to the authorization server with:
+
+   - Authorization code
+   - Client ID and secret
+   - Redirect URI
+
+   In return, it receives:
+
+   - Access token (short-lived)
+   - Refresh token (longer-lived)
+
+5. **Access Protected Resources**
+   Your app uses the **access token** to call APIs on behalf of the user.
+
+6. **Refresh Token (Optional)**
+   When the access token expires, your app can use the **refresh token** to get a new one without further user interaction.
+
+---
+
+### 🔐 Example Use Case
+
+Let’s say you want to build a web app that integrates with the user’s Google Drive:
+
+- Step 1: Redirect user to Google OAuth endpoint
+- Step 2: User logs in and allows access
+- Step 3: You get an authorization code
+- Step 4: Exchange it for tokens
+- Step 5: Use the access token to list files in their Drive
+
+---
+
+### 🆚 vs 2LO
+
+- **3LO**: Requires **user interaction/consent**.
+- **2LO** (Two-legged OAuth): Used for **server-to-server communication** where no user consent is needed (e.g., service accounts).

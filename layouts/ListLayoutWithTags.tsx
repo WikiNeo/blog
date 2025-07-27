@@ -255,10 +255,21 @@ export default function ListLayoutWithTags({
                       </dl>
                       <div className="space-y-3">
                         <div>
-                          <h2 className="text-2xl leading-8 font-bold tracking-tight">
+                          <h2 className="flex items-center gap-2 text-2xl leading-8 font-bold tracking-tight">
                             <Link href={`/${path}`} className="text-gray-900 dark:text-gray-100">
                               {title}
                             </Link>
+                            {(post as CoreContent<Blog> & { pinned?: boolean }).pinned && (
+                              <svg
+                                className="text-primary-500 h-5 w-5 flex-shrink-0"
+                                fill="currentColor"
+                                viewBox="0 0 24 24"
+                                xmlns="http://www.w3.org/2000/svg"
+                                aria-label="Pinned post"
+                              >
+                                <path d="M16,12V4H17V2H7V4H8V12L6,14V16H11.2V22H12.8V16H18V14L16,12Z" />
+                              </svg>
+                            )}
                           </h2>
                           <div className="flex flex-wrap">
                             {tags?.map((tag) => <Tag key={tag} text={tag} />)}
