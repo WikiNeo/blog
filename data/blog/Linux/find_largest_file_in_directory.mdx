@@ -1,0 +1,25 @@
+---
+title: 'Find the Largest File in a Directory (recursive)'
+tags: [Linux]
+date: 2025-07-27
+summary: 'find . -type f -exec du -h {} + | sort -rh | head -n 1'
+---
+
+To find the **largest file** in a directory (recursively) in Linux, use:
+
+```bash
+find . -type f -exec du -h {} + | sort -rh | head -n 1
+```
+
+### Explanation:
+
+- `find . -type f`: find all files starting from current directory (`.`)
+- `-exec du -h {} +`: get their sizes in human-readable form
+- `sort -rh`: sort by size (largest first)
+- `head -n 1`: show the largest one
+
+### If you only want files in the current directory (not recursive):
+
+```bash
+du -ah --max-depth=1 | sort -rh | head -n 1
+```
