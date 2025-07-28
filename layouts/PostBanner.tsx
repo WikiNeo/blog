@@ -15,9 +15,20 @@ interface LayoutProps {
   children: ReactNode
   next?: { path: string; title: string }
   prev?: { path: string; title: string }
+  tagNext?: { path: string; title: string }
+  tagPrev?: { path: string; title: string }
+  primaryTag?: string
 }
 
-export default function PostMinimal({ content, next, prev, children }: LayoutProps) {
+export default function PostMinimal({
+  content,
+  next,
+  prev,
+  tagNext,
+  tagPrev,
+  primaryTag,
+  children,
+}: LayoutProps) {
   const { slug, title, images } = content
   const displayImage =
     images && images.length > 0 ? images[0] : 'https://picsum.photos/seed/picsum/800/400'
@@ -46,6 +57,45 @@ export default function PostMinimal({ content, next, prev, children }: LayoutPro
             </div>
           )}
           <footer>
+            {/* Tag-specific navigation */}
+            {primaryTag && (tagNext || tagPrev) && (
+              <div className="mb-4 border-b border-gray-200 pb-4 dark:border-gray-700">
+                <h2 className="mb-2 text-xs tracking-wide text-gray-500 uppercase dark:text-gray-400">
+                  In "{primaryTag}" tag
+                </h2>
+                <div className="flex flex-col space-y-2 text-sm font-medium sm:flex-row sm:justify-between sm:space-y-0 sm:text-base">
+                  {tagPrev && tagPrev.path && (
+                    <div>
+                      <div className="text-xs tracking-wide text-gray-400 uppercase dark:text-gray-500">
+                        Previous in tag
+                      </div>
+                      <Link
+                        href={`/${tagPrev.path}`}
+                        className="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400"
+                        aria-label={`Previous post in ${primaryTag}: ${tagPrev.title}`}
+                      >
+                        &larr; {tagPrev.title}
+                      </Link>
+                    </div>
+                  )}
+                  {tagNext && tagNext.path && (
+                    <div className="text-right">
+                      <div className="text-xs tracking-wide text-gray-400 uppercase dark:text-gray-500">
+                        Next in tag
+                      </div>
+                      <Link
+                        href={`/${tagNext.path}`}
+                        className="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400"
+                        aria-label={`Next post in ${primaryTag}: ${tagNext.title}`}
+                      >
+                        {tagNext.title} &rarr;
+                      </Link>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+            {/* General navigation */}
             <div className="flex flex-col text-sm font-medium sm:flex-row sm:justify-between sm:text-base">
               {prev && prev.path && (
                 <div className="pt-4 xl:pt-8">

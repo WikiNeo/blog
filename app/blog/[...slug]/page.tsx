@@ -97,6 +97,27 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
     return coreContent(authorResults as Authors)
   })
   const mainContent = coreContent(post)
+
+  // Calculate tag-specific navigation
+  let tagPrev: { path: string; title: string } | null = null
+  let tagNext: { path: string; title: string } | null = null
+
+  if (post.tags && post.tags.length > 0) {
+    // Get the first tag for navigation (you could modify this to use a different logic)
+    const primaryTag = post.tags[0]
+
+    // Filter posts by the primary tag
+    const tagFilteredPosts = sortedCoreContents.filter((p) => p.tags && p.tags.includes(primaryTag))
+
+    // Find current post index in tag-filtered posts
+    const tagPostIndex = tagFilteredPosts.findIndex((p) => p.slug === slug)
+
+    if (tagPostIndex !== -1) {
+      tagPrev = tagFilteredPosts[tagPostIndex + 1] || null
+      tagNext = tagFilteredPosts[tagPostIndex - 1] || null
+    }
+  }
+
   const jsonLd = post.structuredData
   jsonLd['author'] = authorDetails.map((author) => {
     return {
@@ -113,7 +134,15 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <Layout content={mainContent} authorDetails={authorDetails} next={next} prev={prev}>
+      <Layout
+        content={mainContent}
+        authorDetails={authorDetails}
+        next={next}
+        prev={prev}
+        tagNext={tagNext}
+        tagPrev={tagPrev}
+        primaryTag={post.tags && post.tags.length > 0 ? post.tags[0] : null}
+      >
         <MDXLayoutRenderer code={post.body.code} components={components} toc={post.toc} />
       </Layout>
     </>

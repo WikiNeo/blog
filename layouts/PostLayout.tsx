@@ -26,10 +26,22 @@ interface LayoutProps {
   authorDetails: CoreContent<Authors>[]
   next?: { path: string; title: string }
   prev?: { path: string; title: string }
+  tagNext?: { path: string; title: string }
+  tagPrev?: { path: string; title: string }
+  primaryTag?: string
   children: ReactNode
 }
 
-export default function PostLayout({ content, authorDetails, next, prev, children }: LayoutProps) {
+export default function PostLayout({
+  content,
+  authorDetails,
+  next,
+  prev,
+  tagNext,
+  tagPrev,
+  primaryTag,
+  children,
+}: LayoutProps) {
   const { filePath, path, slug, date, title, tags } = content
   const basePath = path.split('/')[0]
 
@@ -125,6 +137,37 @@ export default function PostLayout({ content, authorDetails, next, prev, childre
                     </div>
                   </div>
                 )}
+                {/* Tag-specific navigation */}
+                {primaryTag && (tagNext || tagPrev) && (
+                  <div className="py-4 xl:py-8">
+                    <h2 className="text-xs tracking-wide text-gray-500 uppercase dark:text-gray-400">
+                      In "{primaryTag}" tag
+                    </h2>
+                    <div className="flex justify-between xl:block xl:space-y-4">
+                      {tagPrev && tagPrev.path && (
+                        <div>
+                          <h3 className="text-xs tracking-wide text-gray-400 uppercase dark:text-gray-500">
+                            Previous in tag
+                          </h3>
+                          <div className="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400">
+                            <Link href={`/${tagPrev.path}`}>{tagPrev.title}</Link>
+                          </div>
+                        </div>
+                      )}
+                      {tagNext && tagNext.path && (
+                        <div>
+                          <h3 className="text-xs tracking-wide text-gray-400 uppercase dark:text-gray-500">
+                            Next in tag
+                          </h3>
+                          <div className="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400">
+                            <Link href={`/${tagNext.path}`}>{tagNext.title}</Link>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+                {/* General navigation */}
                 {(next || prev) && (
                   <div className="flex justify-between py-4 xl:block xl:space-y-8 xl:py-8">
                     {prev && prev.path && (
