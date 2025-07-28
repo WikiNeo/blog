@@ -60,44 +60,46 @@ export default function PostLayout({
               </div>
             )}
             <footer>
-              {/* Tag-specific navigation */}
-              {primaryTag && (tagNext || tagPrev) && (
-                <div className="mb-4 border-b border-gray-200 pb-4 dark:border-gray-700">
-                  <h2 className="mb-2 text-xs tracking-wide text-gray-500 uppercase dark:text-gray-400">
-                    In "{primaryTag}" tag
-                  </h2>
-                  <div className="flex flex-col space-y-2 text-sm font-medium sm:flex-row sm:justify-between sm:space-y-0 sm:text-base">
-                    {tagPrev && tagPrev.path && (
-                      <div>
-                        <div className="text-xs tracking-wide text-gray-400 uppercase dark:text-gray-500">
-                          Previous in tag
+              {/* Tag-specific navigation - only show if different from general navigation */}
+              {primaryTag &&
+                (tagNext || tagPrev) &&
+                (tagPrev?.path !== prev?.path || tagNext?.path !== next?.path) && (
+                  <div className="mb-4 border-b border-gray-200 pb-4 dark:border-gray-700">
+                    <h2 className="mb-2 text-xs tracking-wide text-gray-500 uppercase dark:text-gray-400">
+                      In "{primaryTag}" tag
+                    </h2>
+                    <div className="flex flex-col space-y-2 text-sm font-medium sm:flex-row sm:justify-between sm:space-y-0 sm:text-base">
+                      {tagPrev && tagPrev.path && (
+                        <div>
+                          <div className="text-xs tracking-wide text-gray-400 uppercase dark:text-gray-500">
+                            Previous in tag
+                          </div>
+                          <Link
+                            href={`/${tagPrev.path}`}
+                            className="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400"
+                            aria-label={`Previous post in ${primaryTag}: ${tagPrev.title}`}
+                          >
+                            &larr; {tagPrev.title}
+                          </Link>
                         </div>
-                        <Link
-                          href={`/${tagPrev.path}`}
-                          className="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400"
-                          aria-label={`Previous post in ${primaryTag}: ${tagPrev.title}`}
-                        >
-                          &larr; {tagPrev.title}
-                        </Link>
-                      </div>
-                    )}
-                    {tagNext && tagNext.path && (
-                      <div className="text-right">
-                        <div className="text-xs tracking-wide text-gray-400 uppercase dark:text-gray-500">
-                          Next in tag
+                      )}
+                      {tagNext && tagNext.path && (
+                        <div className="text-right">
+                          <div className="text-xs tracking-wide text-gray-400 uppercase dark:text-gray-500">
+                            Next in tag
+                          </div>
+                          <Link
+                            href={`/${tagNext.path}`}
+                            className="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400"
+                            aria-label={`Next post in ${primaryTag}: ${tagNext.title}`}
+                          >
+                            {tagNext.title} &rarr;
+                          </Link>
                         </div>
-                        <Link
-                          href={`/${tagNext.path}`}
-                          className="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400"
-                          aria-label={`Next post in ${primaryTag}: ${tagNext.title}`}
-                        >
-                          {tagNext.title} &rarr;
-                        </Link>
-                      </div>
-                    )}
+                      )}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
               {/* General navigation */}
               <div className="flex flex-col text-sm font-medium sm:flex-row sm:justify-between sm:text-base">
                 {prev && prev.path && (
