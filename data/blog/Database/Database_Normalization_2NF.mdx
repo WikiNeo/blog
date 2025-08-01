@@ -1,0 +1,75 @@
+---
+title: 'Database Normalization: 2NF'
+tags: [Database]
+date: 2025-08-05
+summary: '**Second Normal Form (2NF)** is a step in **database normalization** that builds upon the **First Normal Form (1NF)**. It aims to **eliminate partial dependencies** to reduce redundancy and improve data integrity.'
+---
+
+**Second Normal Form (2NF)** is a step in **database normalization** that builds upon the **First Normal Form (1NF)**. It aims to **eliminate partial dependencies** to reduce redundancy and improve data integrity.
+
+---
+
+### ✅ 1. Requirements for 2NF
+
+A table is in **Second Normal Form** if:
+
+1. It is already in **First Normal Form (1NF)**.
+2. **Every non-prime attribute** is **fully functionally dependent** on the **entire primary key**, not just a part of it.
+
+---
+
+### 🔍 Key Concepts
+
+- **1NF**: All values are atomic (no arrays, repeating groups).
+- **Partial Dependency**: A non-prime attribute depends on **part of a composite key**.
+- **Non-prime Attribute**: A column that is **not part of any candidate key**.
+
+---
+
+### 📊 Example
+
+#### 🚫 Not in 2NF
+
+| StudentID | CourseID | StudentName | CourseName |
+| --------- | -------- | ----------- | ---------- |
+| 1         | CS101    | Alice       | Database   |
+| 2         | CS101    | Bob         | Database   |
+| 1         | MA201    | Alice       | Algebra    |
+
+- Primary Key: `(StudentID, CourseID)`
+- `StudentName` depends **only on StudentID**
+- `CourseName` depends **only on CourseID**
+
+**Problem**: `StudentName` and `CourseName` have **partial dependencies**, violating 2NF.
+
+---
+
+### ✅ In 2NF (After Decomposition)
+
+1. **Student Table**:
+   \| StudentID | StudentName |
+   \|-----------|-------------|
+   \| 1 | Alice |
+   \| 2 | Bob |
+
+2. **Course Table**:
+   \| CourseID | CourseName |
+   \|----------|------------|
+   \| CS101 | Database |
+   \| MA201 | Algebra |
+
+3. **Enrollment Table**:
+   \| StudentID | CourseID |
+   \|-----------|----------|
+   \| 1 | CS101 |
+   \| 2 | CS101 |
+   \| 1 | MA201 |
+
+---
+
+### 🧠 Summary
+
+| Normal Form | Removes                             | Ensures                          |
+| ----------- | ----------------------------------- | -------------------------------- |
+| 1NF         | Repeating groups, non-atomic fields | Atomic values                    |
+| **2NF**     | Partial dependencies                | Full dependency on the whole key |
