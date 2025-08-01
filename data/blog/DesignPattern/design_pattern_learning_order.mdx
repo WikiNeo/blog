@@ -1,0 +1,96 @@
+---
+title: 'Design Patterns Learning Order'
+tags: [DesignPattern]
+date: 2025-08-06
+pinned: true
+---
+
+Here's a recommended **learning order for design patterns** that builds understanding progressively — from the most foundational to the more advanced — following the **Gang of Four (GoF)** classification while mixing in some practical priority for software engineers.
+
+---
+
+## 🔥 **1. Foundational / Frequently Used Patterns**
+
+Start with patterns you'll see and use often. These build intuition about design principles like _encapsulation_, _decoupling_, and _composition over inheritance_.
+
+| **Pattern**        | **Category** | **Why Learn It Early?**                                                     |
+| ------------------ | ------------ | --------------------------------------------------------------------------- |
+| **Singleton**      | Creational   | Very common (but overused), controls object creation                        |
+| **Factory Method** | Creational   | Teaches interface-based design and object creation flexibility              |
+| **Observer**       | Behavioral   | Event-driven systems, core to UI, MVC, pub-sub models                       |
+| **Strategy**       | Behavioral   | Great for replacing conditional logic and making algorithms interchangeable |
+| **Decorator**      | Structural   | Introduces dynamic behavior extension (widely used in Python and Java)      |
+
+---
+
+## 💻 **2. Intermediate / Structural Patterns**
+
+These help you understand composition, abstraction, and relationships between objects.
+
+| **Pattern**         | **Category** | **Why Next?**                                                               |
+| ------------------- | ------------ | --------------------------------------------------------------------------- |
+| **Adapter**         | Structural   | Core to integrating incompatible interfaces (real-world use: wrapping APIs) |
+| **Composite**       | Structural   | Useful for tree structures (UI hierarchies, file systems)                   |
+| **Facade**          | Structural   | Teaches API simplification, subsystem management                            |
+| **Command**         | Behavioral   | Core in undo/redo systems, task queues, UI action encapsulation             |
+| **Template Method** | Behavioral   | Helps understand the "define skeleton / defer detail" principle             |
+
+---
+
+## 🚀 **3. Advanced / Architectural Impact**
+
+Once comfortable, these patterns expand your thinking toward scalable, maintainable designs.
+
+| **Pattern**                 | **Category** | **Where It Shines**                                              |
+| --------------------------- | ------------ | ---------------------------------------------------------------- |
+| **Prototype**               | Creational   | Fast cloning, object generation without new keyword              |
+| **Builder**                 | Creational   | Complex object creation (good for fluent APIs)                   |
+| **State**                   | Behavioral   | Replace state machine conditionals cleanly                       |
+| **Mediator**                | Behavioral   | Centralizes communication, reduces coupling                      |
+| **Chain of Responsibility** | Behavioral   | Request handling pipelines, middlewares                          |
+| **Flyweight**               | Structural   | Memory optimization with shared instances                        |
+| **Visitor**                 | Behavioral   | Extend operations on complex object structures (ASTs, compilers) |
+
+---
+
+## 🧠 **4. Optional / Niche Patterns (Good for completeness)**
+
+These are less common in everyday work but important for a complete picture.
+
+| **Pattern**     | **Category** | **Note**                                                           |
+| --------------- | ------------ | ------------------------------------------------------------------ |
+| **Memento**     | Behavioral   | Undo/rollback systems                                              |
+| **Interpreter** | Behavioral   | Mini language parsers, DSLs                                        |
+| **Bridge**      | Structural   | Separates abstraction from implementation (great in large systems) |
+| **Proxy**       | Structural   | Access control, lazy loading, remote access                        |
+
+---
+
+## ✅ **Bonus: Learn by Use Case / Project**
+
+Rather than memorizing, **implement each pattern** with a small project or code snippet:
+
+- **Observer**: Chat app / event system
+- **Strategy**: Payment method selector
+- **Factory**: Shape or vehicle creation
+- **Decorator**: File I/O enhancements or logging
+- **Command**: Text editor actions / undo-redo
+
+---
+
+## 📚 Suggested Order (Summary)
+
+1. Singleton, Factory Method, Observer, Strategy, Decorator
+2. Adapter, Composite, Facade, Command, Template Method
+3. Prototype, Builder, State, Mediator, Chain of Responsibility, Flyweight, Visitor
+4. Memento, Interpreter, Bridge, Proxy
+
+---
+
+Would you like:
+✅ Code examples per pattern?
+✅ A study roadmap table?
+✅ Book / video recommendations?
+✅ Python-specific examples?
+
+Let me know how deep you want to go!
