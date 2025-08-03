@@ -21,9 +21,9 @@ export default async function BlogPage(props: { searchParams: Promise<{ page: st
 
   return (
     <>
-      <div className="pb-6 pt-6">
+      <div className="pt-6 pb-6">
         <div className="flex flex-col items-start justify-between space-y-4 sm:flex-row sm:items-center sm:space-y-0">
-          <h1 className="text-3xl font-extrabold leading-9 tracking-tight text-gray-900 sm:text-4xl sm:leading-10 md:text-6xl md:leading-14 dark:text-gray-100">
+          <h1 className="text-3xl leading-9 font-extrabold tracking-tight text-gray-900 sm:text-4xl sm:leading-10 md:text-6xl md:leading-14 dark:text-gray-100">
             All Posts
           </h1>
           <RandomBlogButton />

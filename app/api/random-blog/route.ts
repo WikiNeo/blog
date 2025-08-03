@@ -8,9 +8,9 @@ export async function GET() {
   try {
     // Get all published blog posts
     const sortedPosts = allCoreContent(sortPosts(allBlogs))
-    
+
     // Filter out drafts in production
-    const publishedPosts = sortedPosts.filter(post => {
+    const publishedPosts = sortedPosts.filter((post) => {
       if (process.env.NODE_ENV === 'production') {
         return !post.draft
       }
@@ -26,10 +26,10 @@ export async function GET() {
     const randomPost = publishedPosts[randomIndex]
 
     // Return the random post's path for redirection
-    return NextResponse.json({ 
+    return NextResponse.json({
       slug: randomPost.slug,
       path: `/blog/${randomPost.slug}`,
-      title: randomPost.title 
+      title: randomPost.title,
     })
   } catch (error) {
     console.error('Error getting random blog post:', error)
