@@ -1,0 +1,90 @@
+---
+title: 'Database Normalization: 3NF'
+tags: [Database]
+date: 2025-08-11
+---
+
+Third Normal Form (3NF) is a **database normalization** step that ensures your tables are structured to reduce redundancy and improve data integrity, building on the first (1NF) and second normal forms (2NF).
+
+---
+
+## **Quick Recap Before 3NF**
+
+1. **1NF (First Normal Form)** – No repeating groups, atomic column values, each row is unique.
+2. **2NF (Second Normal Form)** – In 1NF, and every non-key attribute is fully dependent on the whole primary key (no partial dependency).
+
+---
+
+## **Definition of 3NF**
+
+A table is in **Third Normal Form** if:
+
+1. **It is already in 2NF**, **and**
+2. **It has no transitive dependencies**, meaning:
+
+   - **Non-key attributes** should depend **only** on the primary key, not on another non-key attribute.
+
+**In plain terms:**
+Every column should tell you something about the key, the whole key, and nothing but the key.
+
+---
+
+## **Example**
+
+### **Before 3NF** (in 2NF but not in 3NF)
+
+```
+Orders
+-------------------------------------------------
+OrderID | CustomerID | CustomerName | CustomerCity
+-------------------------------------------------
+1       | C001       | Alice        | New York
+2       | C002       | Bob          | Los Angeles
+3       | C001       | Alice        | New York
+```
+
+**Problem:**
+
+- `CustomerName` and `CustomerCity` depend on `CustomerID`, not directly on `OrderID`.
+- This is a **transitive dependency**: `OrderID → CustomerID → CustomerName/City`.
+
+---
+
+### **After 3NF**
+
+We split into two tables:
+
+**Orders**
+
+```
+OrderID | CustomerID
+--------------------
+1       | C001
+2       | C002
+3       | C001
+```
+
+**Customers**
+
+```
+CustomerID | CustomerName | CustomerCity
+----------------------------------------
+C001       | Alice        | New York
+C002       | Bob          | Los Angeles
+```
+
+**Benefits:**
+
+- Avoids storing customer details repeatedly.
+- Updating a customer’s city requires changing **only one row** in `Customers`.
+
+---
+
+## **Why 3NF Matters**
+
+✅ Reduces data duplication
+✅ Makes updates faster and less error-prone
+✅ Improves data integrity
+⚠️ Sometimes too much normalization can hurt performance for read-heavy queries — you might need joins.
+
+---
