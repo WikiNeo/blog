@@ -1,101 +1,101 @@
 ---
-title: "[Creational] Factory Method"
+title: '[Creational] Factory Method'
 tags: [DesignPattern]
 date: 2022-04-26
-summary: Consider the case of a hiring manager.
+summary: The Factory Method is a creational design pattern that provides an interface for creating objects but allows subclasses to alter the type of objects that will be created.
 ---
 
-## Real world example
+The **Factory Method** is a creational design pattern that provides an
+interface for creating objects but allows subclasses to alter the type of
+objects that will be created. Instead of calling a constructor directly, the
+pattern delegates object creation to a factory method.
 
-Consider the case of a hiring manager. It is impossible for one person to
-interview for each of the positions. Based on the job opening, she has to
-decide and delegate the interview steps to different people.
+### **Key Concepts**
 
-## In plain words
+- Defines an interface for creating an object.
+- Subclasses decide which class to instantiate.
+- Promotes loose coupling by abstracting the instantiation process.
 
-It provides a way to delegate the instantiation logic to child classes.
+---
 
-## Wikipedia says
+## **Python Example**
 
-In class-based programming, the factory method pattern is a creational pattern
-that uses factory methods to deal with the problem of creating objects without
-having to specify the exact class of the object that will be created. This is
-done by creating objects by calling a factory method—either specified in an
-interface and implemented by child classes, or implemented in a base class and
-optionally overridden by derived classes—rather than by calling a constructor.
+### **Without Factory Method**
 
-## Programmatic Example
+```python
+class Dog:
+    def speak(self):
+        return "Woof!"
 
-Taking our hiring manager example above. First of all we have an interviewer
-interface and some implementations for it
+class Cat:
+    def speak(self):
+        return "Meow!"
 
-```typescript
-interface Interviewer {
-    askQuestions();
-}
+class AnimalShelter:
+    def get_animal(self, animal_type):
+        if animal_type == "dog":
+            return Dog()
+        elif animal_type == "cat":
+            return Cat()
+        else:
+            raise ValueError("Unknown animal type")
 
-class Developer implements Interviewer {
-    askQuestions() {
-        console.log('Asking about design patterns');
-    }
-}
-
-class CommunityExecutive implements Interviewer {
-    askQuestions() {
-        console.log('Asking about community building');
-    }
-}
+shelter = AnimalShelter()
+animal = shelter.get_animal("dog")
+print(animal.speak())  # Output: Woof!
 ```
 
-Now let us create our `HiringManager`
+**Problem:**
 
-```typescript
-abstract class HiringManager {
-    // factory method
-    protected abstract makeInterviewer(): Interviewer;
+- The `AnimalShelter` class is tightly coupled to `Dog` and `Cat`.
+- Adding a new animal requires modifying `get_animal()`.
 
-    public takeInterview(){
-        let interviewer: Interviewer = this.makeInterviewer();
-        interviewer.askQuestions();
-    }
-}
+---
+
+## **With Factory Method**
+
+```python
+from abc import ABC, abstractmethod
+
+# Abstract product
+class Animal(ABC):
+    @abstractmethod
+    def speak(self):
+        pass
+
+# Concrete products
+class Dog(Animal):
+    def speak(self):
+        return "Woof!"
+
+class Cat(Animal):
+    def speak(self):
+        return "Meow!"
+
+# Factory Method Creator (abstract)
+class AnimalShelter(ABC):
+    @abstractmethod
+    def create_animal(self):
+        pass
+
+# Concrete Factories
+class DogShelter(AnimalShelter):
+    def create_animal(self):
+        return Dog()
+
+class CatShelter(AnimalShelter):
+    def create_animal(self):
+        return Cat()
+
+# Client code
+shelter = DogShelter()
+animal = shelter.create_animal()
+print(animal.speak())  # Output: Woof!
 ```
 
-Now any child can extend it and provide the required interviewer
+### **Benefits of Factory Method**
 
+✅ **Encapsulation:** Object creation logic is hidden.
+✅ **Open-Closed Principle:** Adding a new animal (e.g., `Bird`) requires only creating a new subclass.
+✅ **Loose Coupling:** The client doesn't need to know which concrete class is used.
 
-```typescript
-class DevelopmentManager extends HiringManager {
-    protected makeInterviewer(): Interviewer {
-        return new Developer();
-    }
-}
-
-class MarketingManager extends HiringManager{
-    protected makeInterviewer(): Interviewer {
-        return new CommunityExecutive();
-    }
-}
-```
-
-and then it can be used as
-
-```typescript
-let devManager = new DevelopmentManager();
-devManager.takeInterview();
-
-let marketingManager = new MarketingManager();
-marketingManager.takeInterview();
-```
-
-## When to use?
-
-Useful when there is some generic processing in a class but the required
-sub-class is dynamically decided at runtime. Or putting it in other words,
-when the client doesn't know what exact sub-class it might need.
-
-## References
-
-- [https://github.com/kamranahmedse/design-patterns-for-humans](https://github.com/kamranahmedse/design-patterns-for-humans)
-- [https://github.com/torokmark/design_patterns_in_typescript](https://github.com/torokmark/design_patterns_in_typescript)
-- [https://refactoring.guru/design-patterns](https://refactoring.guru/design-patterns)
