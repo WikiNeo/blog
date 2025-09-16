@@ -1,0 +1,65 @@
+---
+title: 'K8s Deployment'
+tags: [K8s]
+date: 2025-08-16
+---
+
+In Kubernetes (K8s), `Deployment` is one of the most commonly used **workload resources**, and it's defined using the API **kind**:
+
+```yaml
+kind: Deployment
+```
+
+### 💡 What does a `Deployment` do?
+
+A `Deployment` manages a **ReplicaSet**, which in turn manages a **set of Pods**. The purpose of using a Deployment is to **declare and maintain a desired state** for your application pods over time.
+
+### ✅ Key features of `Deployment`
+
+- **Declarative updates** to Pods and ReplicaSets
+- Supports **rolling updates** and **rollbacks**
+- Automatically replaces failed or unhealthy Pods
+- Ensures the specified number of replicas is always running
+
+---
+
+### 🧱 Example: Basic `Deployment` YAML
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-app
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata:
+      labels:
+        app: my-app
+    spec:
+      containers:
+        - name: my-app-container
+          image: nginx:1.25
+          ports:
+            - containerPort: 80
+```
+
+### ⚙️ What happens when you apply this?
+
+1. Kubernetes creates a **ReplicaSet**.
+2. The ReplicaSet launches 3 **Pods** with the NGINX image.
+3. If a Pod crashes, it's replaced automatically.
+4. If you update the image version, K8s does a **rolling update**.
+
+---
+
+### 🎯 When to use `kind: Deployment`?
+
+- You want to **run stateless applications** (like web servers, APIs).
+- You want **rolling updates** with zero downtime.
+- You want **replicas** and **auto-replacement** of Pods.
+
+If you’re running **stateful** services (like databases), you might use `kind: StatefulSet` instead.
