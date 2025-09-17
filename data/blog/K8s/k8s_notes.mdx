@@ -23,21 +23,20 @@ kubectl get deployments -n <namespace>
 
 ### get pods in a deployment
 
-````bash
+```bash
 kublectl get pods -n <namespace>
-
+```
 
 ### Restart a deployment
+
 ```bash
 kubectl rollout restart deployment/<deployment-name> -n <namespace>
-````
+```
 
 ## Logging
-
-````
 
 ## Show logs of a pod
 
 ```bash
 kubectl logs <pod-name> -n <namespace>
-````
+```
