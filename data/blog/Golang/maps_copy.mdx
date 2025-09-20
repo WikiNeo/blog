@@ -1,0 +1,57 @@
+---
+title: "Go maps.Copy"
+tags: [Golang]
+date: 2025-09-20
+---
+
+`maps.Copy` is a function from the Go **`maps`** package, introduced in **Go 1.21**, which provides generic utilities for working with maps.
+
+---
+
+### 📘 `maps.Copy` – What it does
+
+```go
+func Copy[K comparable, V any](dst, src map[K]V)
+```
+
+* **Purpose**: Copies key-value pairs from `src` into `dst`.
+* **If key exists** in `dst`, the value will be **overwritten**.
+* **If `dst` is nil**, a **panic** occurs.
+* **`src` can be nil**, in which case it does nothing.
+
+---
+
+### ✅ Example
+
+```go
+package main
+
+import (
+    "fmt"
+    "maps"
+)
+
+func main() {
+    src := map[string]int{"a": 1, "b": 2}
+    dst := map[string]int{"b": 99, "c": 3}
+
+    maps.Copy(dst, src)
+
+    fmt.Println(dst) // Output: map[a:1 b:2 c:3]
+}
+```
+
+* Key `"b"` gets overwritten from `99` to `2`.
+* Key `"a"` is added.
+* Key `"c"` remains untouched.
+
+---
+
+### ⚠️ Notes
+
+* **Go version requirement**: Must be using **Go 1.21 or later**.
+* It **does not return a new map**, it **modifies `dst` in-place**.
+* Use [`maps.Clone`](https://pkg.go.dev/golang.org/x/exp/maps#Clone) if you want to copy into a *new* map.
+
+---
+
