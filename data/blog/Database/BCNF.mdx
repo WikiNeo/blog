@@ -1,0 +1,97 @@
+---
+title: 'Database Normalization: BCNF'
+tags: [Database]
+date: 2025-09-20
+---
+
+
+**BCNF (Boyce-Codd Normal Form)** is a type of database normalization that is **stricter than 3NF (Third Normal Form)**.
+It's used to eliminate redundancy and potential anomalies in relational database design.
+
+---
+
+### 🔁 TL;DR
+
+> A relation is in **BCNF** if **every determinant is a candidate key**.
+
+---
+
+### 📘 Quick Breakdown
+
+* A **determinant** is any attribute (or set of attributes) on the **left-hand side** of a functional dependency (e.g., `A → B`, A is the determinant).
+* A **candidate key** is a minimal set of attributes that can **uniquely identify** every tuple (row) in the relation.
+
+---
+
+### 📋 Formal Definition
+
+A relation `R` is in **Boyce-Codd Normal Form (BCNF)** if:
+
+> For every non-trivial functional dependency `X → Y` in `R`,
+> `X` is a **super key** (i.e., it can uniquely identify tuples).
+
+**"Non-trivial"** means `Y` is not a subset of `X`.
+
+---
+
+### ✅ When Is BCNF Needed?
+
+Even if a table is in **3NF**, it might **still not be in BCNF** if:
+
+* There are **multiple candidate keys**, and
+* Some **non-primary candidate key** determines attributes
+
+---
+
+### 🔧 Example
+
+Let’s say you have a table:
+
+| StudentID | Course  | Instructor |
+| --------- | ------- | ---------- |
+| 1         | Math    | Prof. A    |
+| 2         | Math    | Prof. A    |
+| 3         | History | Prof. B    |
+
+**Functional dependencies:**
+
+* `StudentID → Course, Instructor` ✅ (StudentID is a candidate key)
+* `Course → Instructor` ❌ (Course is not a candidate key)
+
+Here, `Course → Instructor` violates BCNF because `Course` is not a superkey.
+
+---
+
+### 💡 Fixing It
+
+Split into two tables:
+
+1. **StudentCourse(StudentID, Course)**
+2. **CourseInstructor(Course, Instructor)**
+
+Now both are in **BCNF**, and the redundancy is removed.
+
+---
+
+Here are the BCNF-fixed tables derived from the example:
+
+### 1) `StudentCourse`
+
+Stores which course each student takes.
+**PK:** `(StudentID, Course)`
+
+| StudentID | Course  |
+| --------- | ------- |
+| 1         | Math    |
+| 2         | Math    |
+| 3         | History |
+
+### 2) `CourseInstructor`
+
+Captures the functional dependency **Course → Instructor**.
+**PK:** `Course`
+
+| Course  | Instructor |
+| ------- | ---------- |
+| Math    | Prof. A    |
+| History | Prof. B    |
