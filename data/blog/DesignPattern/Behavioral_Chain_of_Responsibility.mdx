@@ -2,7 +2,106 @@
 title: "[Behavioral] Chain of Responsibility"
 tags: [DesignPattern]
 date: 2022-04-14
-summary: For example, you have three payment methods (`A`, `B` and `C`) setup in your account; each having a different amount in it.
+summary: The Chain of Responsibility design pattern is a behavioral pattern that allows a request to be passed along a chain of handlers.
+---
+
+The **Chain of Responsibility** design pattern is a **behavioral pattern** that allows a request to be passed along a chain of handlers. Each handler decides either to process the request or to pass it to the next handler in the chain.
+
+---
+
+## 🔗 Intent
+
+To decouple the sender of a request from its receivers by giving multiple objects a chance to handle the request.
+
+---
+
+## 🧱 Structure
+
+```
+Client → Handler1 → Handler2 → Handler3 → ...
+```
+
+* **Handler**: Declares the interface for handling requests and optionally maintains a reference to the next handler.
+* **ConcreteHandler**: Handles the request or forwards it to the next handler.
+* **Client**: Initiates the request and sends it to the first handler in the chain.
+
+---
+
+## 🐍 Python Example
+
+```python
+from typing import Optional
+
+class Handler:
+    def __init__(self, successor: Optional['Handler'] = None):
+        self.successor = successor
+
+    def handle(self, request: str):
+        if self.successor:
+            return self.successor.handle(request)
+        return f"No handler could handle the request: {request}"
+
+class AuthHandler(Handler):
+    def handle(self, request: str):
+        if request == "auth":
+            return "AuthHandler: Request handled"
+        return super().handle(request)
+
+class LoggingHandler(Handler):
+    def handle(self, request: str):
+        if request == "log":
+            return "LoggingHandler: Request handled"
+        return super().handle(request)
+
+class DataHandler(Handler):
+    def handle(self, request: str):
+        if request == "data":
+            return "DataHandler: Request handled"
+        return super().handle(request)
+
+# Build chain: Auth → Logging → Data
+chain = AuthHandler(LoggingHandler(DataHandler()))
+
+# Send requests
+print(chain.handle("auth"))   # AuthHandler handles it
+print(chain.handle("log"))    # LoggingHandler handles it
+print(chain.handle("data"))   # DataHandler handles it
+print(chain.handle("unknown"))# No handler handles it
+```
+
+---
+
+## ✅ Output
+
+```
+AuthHandler: Request handled
+LoggingHandler: Request handled
+DataHandler: Request handled
+No handler could handle the request: unknown
+```
+
+---
+
+## ✅ Use Cases
+
+* Middleware pipelines (e.g., HTTP request processing)
+* Event handling systems
+* Logging frameworks
+* Input validation chains
+
+---
+
+## 🔄 Pros
+
+* Reduces coupling between sender and receiver
+* Allows adding or reordering handlers easily
+* Promotes open/closed principle
+
+## ⚠️ Cons
+
+* Can be hard to debug if the chain becomes long or complex
+* A request might go unhandled if not all cases are covered
+
 ---
 
 ## Real world example
@@ -127,6 +226,7 @@ test('test chain-of-responsibility design patterns', () => {
 
 ## References
 
-- [https://github.com/kamranahmedse/design-patterns-for-humans](https://github.com/kamranahmedse/design-patterns-for-humans)
-- [https://github.com/torokmark/design_patterns_in_typescript](https://github.com/torokmark/design_patterns_in_typescript)
-- [https://refactoring.guru/design-patterns](https://refactoring.guru/design-patterns)
+* [https://github.com/kamranahmedse/design-patterns-for-humans](https://github.com/kamranahmedse/design-patterns-for-humans)
+* [https://github.com/torokmark/design_patterns_in_typescript](https://github.com/torokmark/design_patterns_in_typescript)
+* [https://refactoring.guru/design-patterns](https://refactoring.guru/design-patterns)
+
