@@ -1,0 +1,96 @@
+---
+title: 'Database Normalization: 4NF'
+tags: [Database]
+date: 2025-09-27
+---
+
+**Fourth Normal Form (4NF)** is a level of database normalization designed to eliminate **multi-valued dependencies**, which are a more subtle type of redundancy not handled by 3NF or even Boyce-Codd Normal Form (BCNF).
+
+---
+
+### 🔄 Quick Recap of Earlier Forms
+
+| Normal Form | What It Solves                                                 |
+| ----------- | -------------------------------------------------------------- |
+| 1NF         | Atomicity (no repeating groups, each column has atomic values) |
+| 2NF         | Partial dependencies (applies to composite keys)               |
+| 3NF         | Transitive dependencies (non-key depending on another non-key) |
+| BCNF        | Every determinant is a candidate key (a stricter form of 3NF)  |
+
+---
+
+### 🧩 What Is a Multi-Valued Dependency?
+
+A **multi-valued dependency (MVD)** occurs when:
+
+> For a single value of attribute A, there are **multiple independent values** of attribute B and attribute C — and **B and C are independent of each other**.
+
+This leads to **repetition and redundancy** if not separated.
+
+---
+
+### 📌 4NF Rule
+
+A table is in **4NF** if:
+
+* It is already in **Boyce-Codd Normal Form (BCNF)**
+* **AND** it has **no non-trivial multi-valued dependencies**
+
+---
+
+### 🧠 Example
+
+#### Not in 4NF
+
+```text
+StudentCoursesLanguages
+-------------------------
+Student | Course | Language
+--------|--------|---------
+Alice   | Math   | English
+Alice   | Math   | French
+Alice   | History| English
+Alice   | History| French
+```
+
+Here:
+
+* Each **student** can take **multiple courses**
+* Each **student** can speak **multiple languages**
+* But **Courses and Languages are independent**!
+
+This causes a **multi-valued dependency**:
+`Student →→ Course` and `Student →→ Language`
+
+#### Split into 4NF
+
+```text
+StudentCourses
+---------------
+Student | Course
+--------|--------
+Alice   | Math
+Alice   | History
+
+StudentLanguages
+----------------
+Student | Language
+--------|----------
+Alice   | English
+Alice   | French
+```
+
+Now the **redundancy is gone**, and **MVDs are eliminated** ✅
+
+---
+
+### 🛠 Summary
+
+| Aspect           | 4NF                                                         |
+| ---------------- | ----------------------------------------------------------- |
+| Based on         | BCNF + No Multi-Valued Dependencies                         |
+| Solves           | Redundancy due to independent multivalued facts             |
+| Common Fix       | Decompose into multiple relations                           |
+| Real-World Usage | Often important in design of **many-to-many relationships** |
+
+---
