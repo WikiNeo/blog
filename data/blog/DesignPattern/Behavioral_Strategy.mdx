@@ -1,8 +1,103 @@
 ---
-title: "[Behavioral] Strategy"
+title: "[Behavioral] Strategy Pattern"
 tags: [DesignPattern]
-date: 2022-04-21
-summary: started to grow and bubble sort started getting very slow.
+date: 2025-10-04
+summary: "The **Strategy Design Pattern** is a **behavioral design pattern** that enables selecting an algorithm or behavior at **runtime**."
+---
+
+
+The **Strategy Design Pattern** is a **behavioral design pattern** that enables selecting an algorithm or behavior at **runtime**.
+
+---
+
+### 🧠 **Intent**
+
+> Define a family of algorithms, encapsulate each one, and make them interchangeable.
+> Strategy lets the algorithm vary independently from clients that use it.
+
+---
+
+### 🔧 **When to Use**
+
+* You have multiple related algorithms or behaviors.
+* You want to switch between them dynamically.
+* You want to avoid conditional logic (`if/elif` or `switch`) for choosing behavior.
+* You want to isolate implementation details of algorithms from the context (client code).
+
+---
+
+### 📌 **Structure**
+
+```text
+Context
+ └── uses a Strategy
+
+Strategy (Interface)
+ ├── + algorithm_interface()
+     ▲
+     │
+ConcreteStrategyA / ConcreteStrategyB
+ └── implements algorithm_interface()
+```
+
+---
+
+### 🐍 **Python Example**
+
+```python
+from abc import ABC, abstractmethod
+
+# Strategy interface
+class SortStrategy(ABC):
+    @abstractmethod
+    def sort(self, data):
+        pass
+
+# Concrete strategies
+class BubbleSort(SortStrategy):
+    def sort(self, data):
+        print("Using Bubble Sort")
+        return sorted(data)  # Placeholder
+
+class QuickSort(SortStrategy):
+    def sort(self, data):
+        print("Using Quick Sort")
+        return sorted(data)  # Placeholder
+
+# Context
+class Sorter:
+    def __init__(self, strategy: SortStrategy):
+        self.strategy = strategy
+
+    def set_strategy(self, strategy: SortStrategy):
+        self.strategy = strategy
+
+    def sort(self, data):
+        return self.strategy.sort(data)
+
+# Usage
+data = [5, 2, 9, 1]
+
+sorter = Sorter(BubbleSort())
+print(sorter.sort(data))  # Using Bubble Sort
+
+sorter.set_strategy(QuickSort())
+print(sorter.sort(data))  # Using Quick Sort
+```
+
+---
+
+### ✅ **Benefits**
+
+* Clean separation of concerns.
+* Open/Closed Principle (add new strategies without modifying context).
+* Replaces complex conditional logic with polymorphism.
+
+### ⚠️ **Drawbacks**
+
+* Increases number of classes.
+* Client must understand different strategies to choose one.
+
 ---
 
 ## Real world example
@@ -83,6 +178,7 @@ test('test strategy', () => {
 
 ## References
 
-- [https://github.com/kamranahmedse/design-patterns-for-humans](https://github.com/kamranahmedse/design-patterns-for-humans)
-- [https://github.com/torokmark/design_patterns_in_typescript](https://github.com/torokmark/design_patterns_in_typescript)
-- [https://refactoring.guru/design-patterns](https://refactoring.guru/design-patterns)
+* [https://github.com/kamranahmedse/design-patterns-for-humans](https://github.com/kamranahmedse/design-patterns-for-humans)
+* [https://github.com/torokmark/design_patterns_in_typescript](https://github.com/torokmark/design_patterns_in_typescript)
+* [https://refactoring.guru/design-patterns](https://refactoring.guru/design-patterns)
+
