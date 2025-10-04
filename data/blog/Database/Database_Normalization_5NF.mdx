@@ -1,0 +1,179 @@
+---
+title: 'Database Normalization: 5NF'
+tags: [Database]
+date: 2025-10-04
+---
+
+**Fifth Normal Form (5NF)** — also called **Project-Join Normal Form (PJNF)** — is a level of database normalization that ensures **lossless decomposition** of a relation into smaller relations that can be **joined back without introducing spurious tuples**.
+
+---
+
+### ✅ **Definition of 5NF**
+
+A relation is in **5NF** if:
+
+> It is in **4NF**, and every **join dependency** in the relation is a consequence of the **candidate keys**.
+
+In simpler terms:
+
+* You break a table into the smallest possible pieces such that **no redundant data** exists.
+* You can **reconstruct** the original table **exactly** by **joining** the decomposed tables.
+* Decomposition eliminates **anomalies** without sacrificing information.
+
+---
+
+### 📌 **When is 5NF needed?**
+
+It’s needed **rarely**, but becomes essential when:
+
+* You have **complex many-to-many relationships** between three or more entities.
+* Decomposing into binary joins (normal 2-table joins) **isn't enough** to eliminate redundancy without data loss.
+
+---
+
+### 📊 **Example of 5NF Problem**
+
+Suppose a company records **which employee** knows **which language** and is assigned to **which project**.
+
+| Employee | Language | Project |
+| -------- | -------- | ------- |
+| Alice    | English  | Alpha   |
+| Alice    | French   | Alpha   |
+| Alice    | English  | Beta    |
+
+This may imply all combinations:
+
+* Alice speaks English & French
+* Alice works on Alpha & Beta
+  So, does she speak French on Beta too? That’s **uncertain**, leading to **spurious tuples** if joined naively.
+
+---
+
+### ✅ **5NF Solution**
+
+Decompose into:
+
+1. **Employee–Language**
+2. **Employee–Project**
+3. **Language–Project**
+
+Then **reconstruct the full table** using a **3-way join**, ensuring **no spurious tuples**.
+
+---
+
+### 🧠 Key Concepts
+
+| Term                | Meaning                                                                            |
+| ------------------- | ---------------------------------------------------------------------------------- |
+| **Join Dependency** | A situation where a table can be recreated by joining multiple smaller tables.     |
+| **Lossless Join**   | Joining the decomposed tables gives back the original table without spurious rows. |
+| **Spurious Tuple**  | A false combination that didn’t exist in the original data.                        |
+
+---
+
+### ✅ Summary
+
+| Normal Form | Removes                         | Based On                 |
+| ----------- | ------------------------------- | ------------------------ |
+| 1NF         | Repeating groups                | Atomic values            |
+| 2NF         | Partial dependencies            | Full functional deps     |
+| 3NF         | Transitive dependencies         | Non-transitive deps      |
+| BCNF        | Functional dependency anomalies | Determinants are keys    |
+| 4NF         | Multi-valued dependencies       | No non-trivial MVDs      |
+| **5NF**     | Join dependencies               | Lossless join dependency |
+
+## Original 3‑way relation `EmployeeLanguageProject(E, L, P)`
+
+What we **intend** to store:
+
+| Employee | Language | Project |
+| -------- | -------- | ------- |
+| Alice    | English  | Alpha   |
+| Alice    | English  | Beta    |
+| Alice    | French   | Alpha   |
+| Bob      | English  | Beta    |
+
+If we tried to keep this as one table, we’d risk redundancy and anomalies. In **5NF**, we decompose into three projections whose **3‑way natural join** gives back exactly these four rows.
+
+---
+
+## Decomposed tables (5NF)
+
+### 1) `EmployeeLanguage(E, L)`
+
+| Employee | Language |
+| -------- | -------- |
+| Alice    | English  |
+| Alice    | French   |
+| Bob      | English  |
+
+### 2) `EmployeeProject(E, P)`
+
+| Employee | Project |
+| -------- | ------- |
+| Alice    | Alpha   |
+| Alice    | Beta    |
+| Bob      | Beta    |
+
+### 3) `LanguageProject(L, P)`
+
+| Language | Project |
+| -------- | ------- |
+| English  | Alpha   |
+| English  | Beta    |
+| French   | Alpha   |
+
+---
+
+## Why this is 5NF (what it prevents)
+
+* If you only joined **EmployeeLanguage ⨝ EmployeeProject**, you would (incorrectly) get an extra tuple:
+
+  * **Alice–French–Beta** (spurious!)
+* Adding the third table **LanguageProject** filters that out because **(French, Beta)** does **not** exist there.
+* Thus, **only the 3‑way join** (all three tables) reproduces the intended four rows — that’s the hallmark of 5NF.
+
+---
+
+## (Optional) SQL you can run
+
+```sql
+-- Decomposed tables
+CREATE TABLE EmployeeLanguage (
+  employee TEXT,
+  language TEXT,
+  PRIMARY KEY (employee, language)
+);
+
+CREATE TABLE EmployeeProject (
+  employee TEXT,
+  project  TEXT,
+  PRIMARY KEY (employee, project)
+);
+
+CREATE TABLE LanguageProject (
+  language TEXT,
+  project  TEXT,
+  PRIMARY KEY (language, project)
+);
+
+-- Data
+INSERT INTO EmployeeLanguage VALUES
+  ('Alice','English'), ('Alice','French'), ('Bob','English');
+
+INSERT INTO EmployeeProject VALUES
+  ('Alice','Alpha'), ('Alice','Beta'), ('Bob','Beta');
+
+INSERT INTO LanguageProject VALUES
+  ('English','Alpha'), ('English','Beta'), ('French','Alpha');
+
+-- Reconstruct the original ternary relation (lossless 3-way join)
+SELECT el.employee, el.language, ep.project
+FROM EmployeeLanguage el
+JOIN EmployeeProject ep
+  ON el.employee = ep.employee
+JOIN LanguageProject lp
+  ON el.language = lp.language
+ AND ep.project  = lp.project
+ORDER BY 1,2,3;
+```
