@@ -1,49 +1,30 @@
 ---
-title: "OSI model"
+title: 'OSI model'
 tags: [Network]
-date: 2021-09-18
-summary: The Open Systems Interconnection model (OSI model) is a conceptual model that characterises and standardises the communication functions of a telecommunication or computing system without regard to its underlying internal structure and technology.
+date: 2025-10-15
 ---
 
-The Open Systems Interconnection model (OSI model) is a conceptual model that characterises and standardises the communication functions of a telecommunication or computing system without regard to its underlying internal structure and technology. Its goal is the interoperability of diverse communication systems with standard communication protocols.
+The **OSI Model** (Open Systems Interconnection Model) is a **conceptual framework** that standardizes how different computer systems communicate over a network. It divides the communication process into **7 layers**, each responsible for specific network functions.
 
-The model partitions the flow of data in a communication system into seven
-abstraction layers, from the physical implementation of transmitting bits across
-a communications medium to the highest-level representation of data of a
-distributed application. Each intermediate layer serves a class of functionality
-to the layer above it and is served by the layer below it. Classes of
-functionality are realized in software by standardized communication protocols.
+Here’s a quick overview:
 
-## Layer architecture
+| **Layer** | **Name**         | **Primary Function**                                           | **Example Protocols / Technologies** |
+| --------- | ---------------- | -------------------------------------------------------------- | ------------------------------------ |
+| **7**     | **Application**  | Interface for end-user applications to access network services | HTTP, HTTPS, FTP, SMTP, DNS          |
+| **6**     | **Presentation** | Data translation, encryption, compression                      | SSL/TLS, JPEG, ASCII, MPEG           |
+| **5**     | **Session**      | Establishes, manages, and terminates sessions                  | NetBIOS, RPC, PPTP                   |
+| **4**     | **Transport**    | Reliable or unreliable delivery, flow control                  | TCP, UDP                             |
+| **3**     | **Network**      | Logical addressing and routing                                 | IP, ICMP, OSPF, BGP                  |
+| **2**     | **Data Link**    | Physical addressing, error detection                           | Ethernet, MAC, PPP, ARP              |
+| **1**     | **Physical**     | Transmission of raw bits over a physical medium                | Cables, Hubs, NICs, Wi-Fi (PHY)      |
 
-### Layer 1: Physical Layer
+### 🔄 Simplified Flow
 
-The physical layer is responsible for the transmission and reception of
-unstructured raw data between a device and a physical transmission medium. It
-converts the digital bits into electrical, radio, or optical signals. Layer
-specifications define characteristics such as voltage levels, the timing of
-voltage changes, physical data rates, maximum transmission distances, modulation
-scheme, channel access method and physical connectors. This includes the layout
-of pins, voltages, line impedance, cable specifications, signal timing and
-frequency for wireless devices. Bit rate control is done at the physical layer
-and may define transmission mode as simplex, half duplex, and full duplex. The
-components of a physical layer can be described in terms of a network topology.
-Physical layer specifications are included in the specifications for the
-ubiquitous Bluetooth, Ethernet, and USB standards. An example of a less
-well-known physical layer specification would be for the CAN standard.
+- **Sender:** Application → Presentation → Session → Transport → Network → Data Link → Physical
+- **Receiver:** Physical → Data Link → Network → Transport → Session → Presentation → Application
 
-### Layer 2: Data Link Layer
+### 🧠 Mnemonic to Remember
 
-### Layer 3: Network Layer
+> **A**ll **P**eople **S**eem **T**o **N**eed **D**ata **P**rocessing
+> (Application → Presentation → Session → Transport → Network → Data Link → Physical)
 
-### Layer 4: Transport Layer
-
-### Layer 5: Session Layer
-
-### Layer 6: Presentation Layer
-
-### Layer 7: Application Layer
-
-## Reference
-
-- [https://en.wikipedia.org/wiki/OSI_model](https://en.wikipedia.org/wiki/OSI_model)
