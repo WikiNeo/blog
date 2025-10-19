@@ -1,0 +1,69 @@
+---
+title: "Bijection"
+tags: [Mathematics]
+date: 2025-10-19
+---
+
+## Bijection in Set Theory
+
+A **bijection** (or **bijective function**) is a function that is both *injective* and *surjective* — that is, a one-to-one correspondence between two sets.
+
+---
+
+### Definition
+
+Given two sets $A$ and $B$, a function  
+$$
+f: A \to B
+$$
+is a **bijection** if:
+
+1. **Injective (one-to-one):**
+   $$
+   \forall a_1, a_2 \in A,\ f(a_1) = f(a_2) \implies a_1 = a_2
+   $$
+
+2. **Surjective (onto):**
+   $$
+   \forall b \in B,\ \exists a \in A \text{ such that } f(a) = b
+   $$
+
+If both conditions hold, each element of $A$ corresponds to exactly one unique element of $B$, and vice versa.
+
+---
+
+### Examples
+
+**Finite example:**
+
+$$
+A = \{1, 2, 3\}, \quad B = \{a, b, c\}
+$$
+Define $f(1)=a,\ f(2)=b,\ f(3)=c$.  
+✅ This is a bijection — each element of $A$ matches exactly one in $B$.
+
+**Infinite example:**
+
+$$
+f: \mathbb{Z} \to \mathbb{Z}, \quad f(x) = x + 1
+$$
+✅ This is also bijective, since it’s both injective and surjective.
+
+---
+
+### Why It Matters
+
+If there exists a bijection between two sets $A$ and $B$, they have the **same cardinality** (the same “size”), even if they’re infinite.  
+For example:
+$$
+\mathbb{N} \leftrightarrow \text{even numbers } 2\mathbb{N}
+$$
+
+---
+
+### In Set Theory vs. Real Analysis
+
+| Context | Description |
+|----------|--------------|
+| **Set theory** | Purely structural — about correspondence between sets. Used to define cardinality. |
+| **Real analysis** | Adds extra properties (continuity, differentiability). Bijection helps define invertible functions like $f(x) = e^x$ and its inverse $\ln(x)$. |
