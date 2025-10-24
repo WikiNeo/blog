@@ -1,0 +1,13 @@
+---
+title: 'Fix Linux Gaming Display Issue'
+tags: [Gaming]
+date: 2025-10-24
+---
+
+```shell
+# install gamescope and vulkan
+sudo pacman -S vulkan-icd-loader vulkan-tools gamescope
+
+# add the folloinwg launch option the game in steam
+gamescope -W 3440 -H 1440 -f -- %command%
+```
