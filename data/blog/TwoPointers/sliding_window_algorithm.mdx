@@ -1,0 +1,98 @@
+---
+title: "Sliding Window Algorithm"
+tags: [TwoPointers]
+date: 2025-11-12
+---
+
+
+The **window sliding technique** (also known as the **sliding window algorithm**) is a fundamental approach used to optimize problems involving **arrays or lists**, where you need to **analyze a contiguous subrange** (or “window”) of elements — for example, to compute sums, averages, maximums, or other properties efficiently.
+
+---
+
+### 💡 Core Idea
+
+Instead of recomputing the result from scratch every time the window moves, you **reuse partial results** from the previous window and **update incrementally** — typically by:
+
+1. **Adding** the new element that enters the window, and
+2. **Removing** the element that leaves the window.
+
+This avoids redundant computation and often reduces time complexity from **O(n × k)** to **O(n)**.
+
+---
+
+### 🧩 Example 1: Fixed-size window sum
+
+**Problem:** Given an array of integers and a window size `k`, find the **maximum sum of any subarray of length k**.
+
+#### ❌ Naive approach
+
+Compute the sum of each subarray independently.
+Time complexity: **O(n × k)**
+
+#### ✅ Sliding window approach
+
+```python
+def max_sum_subarray(nums, k):
+    window_sum = sum(nums[:k])  # initial window
+    max_sum = window_sum
+    
+    for i in range(k, len(nums)):
+        window_sum += nums[i] - nums[i - k]  # slide window
+        max_sum = max(max_sum, window_sum)
+    
+    return max_sum
+```
+
+**Time complexity:** O(n)
+**Space complexity:** O(1)
+
+---
+
+### 🧩 Example 2: Variable-size window (two-pointer)
+
+In some problems (e.g., “smallest subarray with sum ≥ target” or “longest substring without repeating characters”), the window size isn’t fixed — it **expands and contracts** dynamically using two pointers (`left`, `right`).
+
+Example: Longest substring without repeating characters
+
+```python
+def longest_unique_substring(s):
+    seen = {}
+    left = max_len = 0
+    
+    for right, ch in enumerate(s):
+        if ch in seen and seen[ch] >= left:
+            left = seen[ch] + 1  # shrink window
+        seen[ch] = right
+        max_len = max(max_len, right - left + 1)
+    
+    return max_len
+```
+
+**Pattern:**
+
+* Expand the right pointer to include more characters.
+* Shrink from the left when constraints are violated.
+
+---
+
+### ⚙️ When to Use
+
+Sliding window is ideal when:
+
+* You deal with **contiguous segments** of a sequence (array, string, list).
+* You need **aggregate properties** (sum, average, count, etc.) of those segments.
+* You want to **reduce time complexity** by reusing overlapping computations.
+
+---
+
+### 🧠 Common Use Cases
+
+* Maximum/minimum sum subarray of size `k`
+* Longest substring without repeating characters
+* Smallest subarray with a sum greater than a target
+* Finding averages of subarrays
+* Problems in signal processing or moving averages
+* Pattern matching in strings (e.g., anagrams)
+
+---
+
