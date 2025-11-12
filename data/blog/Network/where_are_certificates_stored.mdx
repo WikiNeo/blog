@@ -1,0 +1,112 @@
+---
+title: 'Where are certificates stored?'
+tags: [Network]
+date: 2025-11-12
+---
+
+---
+
+## 🧩 1. There Are _Two_ Kinds of Certificates to Think About
+
+| Type                                      | Purpose                                                                             | Example                                                           |
+| ----------------------------------------- | ----------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| **Your own website’s certificate**        | Used by your web server (e.g., `nginx`, `apache`) to prove its identity to visitors | `/etc/letsencrypt/live/example.com/fullchain.pem`                 |
+| **Trusted authorities (CA certificates)** | Used by browsers and operating systems to _verify_ remote sites                     | `/etc/ssl/certs/ca-certificates.crt` on Linux, or OS trust stores |
+
+So we’ll cover both sides 👇
+
+---
+
+## 🌐 2. If You’re a Website Owner (Server Side)
+
+When you install an SSL/TLS certificate for your site (say `example.com`), it’s stored on your server in **specific files**, typically:
+
+| File            | Contains                              | Typical Path (Linux)                              |
+| --------------- | ------------------------------------- | ------------------------------------------------- |
+| `fullchain.pem` | Your certificate + intermediate chain | `/etc/letsencrypt/live/example.com/fullchain.pem` |
+| `privkey.pem`   | Your private key (keep secret!)       | `/etc/letsencrypt/live/example.com/privkey.pem`   |
+| `chain.pem`     | Intermediate certificates only        | `/etc/letsencrypt/live/example.com/chain.pem`     |
+
+For example, in **Nginx**:
+
+```nginx
+server {
+    listen 443 ssl;
+    server_name example.com;
+
+    ssl_certificate     /etc/letsencrypt/live/example.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/example.com/privkey.pem;
+}
+```
+
+Or in **Apache**:
+
+```apache
+SSLCertificateFile /etc/letsencrypt/live/example.com/fullchain.pem
+SSLCertificateKeyFile /etc/letsencrypt/live/example.com/privkey.pem
+```
+
+If you used **Let’s Encrypt**, these are automatically managed by `certbot` (and renewed every 90 days).
+
+---
+
+## 🧠 3. If You’re a User (Client Side)
+
+Your browser and OS store **trusted Certificate Authorities (CAs)** so they can verify site certificates.
+Here’s where they live:
+
+| Platform               | Store Type                       | Typical Location                                                           |
+| ---------------------- | -------------------------------- | -------------------------------------------------------------------------- |
+| **Linux**              | System-wide CA bundle            | `/etc/ssl/certs/ca-certificates.crt` or `/etc/pki/tls/certs/ca-bundle.crt` |
+| **macOS**              | Keychain Access → “System Roots” | `/System/Library/Keychains/SystemRootCertificates.keychain`                |
+| **Windows**            | Windows Certificate Store        | Managed in Control Panel → Internet Options → Content → Certificates       |
+| **Browsers (Firefox)** | Own store, separate from OS      | Preferences → Privacy & Security → Certificates → “View Certificates”      |
+
+When you visit `https://example.com`:
+
+- The site sends its certificate chain.
+- Your browser verifies it against these **trusted roots** stored locally.
+
+---
+
+## 🧰 4. Developer or CLI Tools
+
+Tools like `curl`, `git`, or `openssl` rely on the same system-wide trust bundle.
+
+Example:
+
+```bash
+# Show trusted CA bundle path
+openssl version -d
+# Usually points to /etc/ssl/certs
+```
+
+You can also list the system’s trusted roots:
+
+```bash
+ls /etc/ssl/certs/
+```
+
+---
+
+## 🔒 5. Important Security Points
+
+- **Private keys** (`privkey.pem`) must stay _secret_ — they’re what prove your server’s identity.
+- **Certificates** (`fullchain.pem`, `chain.pem`) can be public — they’re shared with clients.
+- Backups should protect private keys with strict file permissions:
+
+  ```bash
+  chmod 600 /etc/letsencrypt/live/example.com/privkey.pem
+  ```
+
+---
+
+### 🧭 Summary
+
+| Perspective             | File/Location                        | Purpose                         |
+| ----------------------- | ------------------------------------ | ------------------------------- |
+| **Server**              | `/etc/letsencrypt/live/<domain>/`    | Your site’s certificate + key   |
+| **Client (OS/browser)** | OS trust store or browser CA list    | Trusted CAs for verifying sites |
+| **CLI tools**           | `/etc/ssl/certs/ca-certificates.crt` | Used for HTTPS verification     |
+
+---

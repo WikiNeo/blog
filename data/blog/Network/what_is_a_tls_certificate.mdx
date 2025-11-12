@@ -1,0 +1,94 @@
+---
+title: 'What is a TLS Certificate?'
+tags: [Network]
+date: 2025-11-12
+---
+
+A **website certificate**, more precisely a **TLS/SSL certificate**, is a **digital credential** that helps ensure a website’s authenticity, security, and trustworthiness. It’s a cornerstone of secure communication on the internet.
+
+Let’s break it down clearly 👇
+
+---
+
+### 🔐 1. What It Is
+
+A website certificate is a **digitally signed file** issued by a **Certificate Authority (CA)** (like DigiCert, Let’s Encrypt, or GlobalSign).
+It proves that:
+
+- The website really belongs to the organization or person it claims to represent.
+- The connection between your browser and the website is **encrypted** so others can’t spy or tamper with it.
+
+You can think of it as the website’s **ID card**, signed by a trusted authority.
+
+---
+
+### 🧩 2. What It Contains
+
+A typical TLS certificate includes:
+
+- **Domain name** (e.g., `example.com`)
+- **Owner information** (organization name, location, etc.)
+- **Public key** (used for encryption)
+- **Issuer information** (the CA that issued it)
+- **Validity period** (start and expiry dates)
+- **Digital signature** (the CA’s cryptographic proof)
+
+---
+
+### 🔄 3. How It Works — Simplified Flow
+
+When you visit a site like `https://example.com`:
+
+1. **Browser requests connection:**
+   You connect to the site using HTTPS.
+
+2. **Server sends certificate:**
+   The website sends its TLS certificate to your browser.
+
+3. **Browser verifies authenticity:**
+
+   - It checks that the certificate:
+
+     - Is issued by a trusted CA.
+     - Matches the domain (`example.com`).
+     - Hasn’t expired or been revoked.
+
+4. **Key exchange (encryption setup):**
+
+   - If valid, the browser and server use **public-key cryptography** to securely agree on a **session key**.
+   - This session key encrypts all communication between your browser and the server.
+
+5. **Secure communication begins:**
+
+   - The padlock 🔒 appears in your browser’s address bar.
+   - Data you send (like passwords or credit card info) is encrypted and safe from eavesdropping.
+
+---
+
+### ⚙️ 4. Types of Certificates
+
+| Type                            | Verification Level                            | Typical Use                |
+| ------------------------------- | --------------------------------------------- | -------------------------- |
+| **DV (Domain Validated)**       | Checks domain ownership only                  | Blogs, personal sites      |
+| **OV (Organization Validated)** | Verifies organization identity                | Company websites           |
+| **EV (Extended Validation)**    | Deep verification with legal checks           | Banks, large corporations  |
+| **Wildcard**                    | Covers all subdomains (e.g., `*.example.com`) | Multi-service sites        |
+| **SAN / Multi-domain**          | Covers multiple distinct domains              | SaaS or large web services |
+
+---
+
+### 🧠 5. Why It Matters
+
+Without a valid certificate:
+
+- Browsers show warnings like **“Your connection is not private”**.
+- Attackers could intercept traffic (man-in-the-middle attack).
+- Users lose trust in the site.
+
+With a valid certificate:
+
+- Data is encrypted.
+- The website’s identity is verified.
+- Trust indicators (like HTTPS and 🔒) reassure visitors.
+
+---

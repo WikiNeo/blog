@@ -1,0 +1,96 @@
+---
+title: 'PEM file and OpenSSL'
+tags: [Network]
+date: 2025-11-12
+---
+
+---
+
+### 🧾 1. What “PEM” Means
+
+**PEM** stands for **Privacy-Enhanced Mail**, an old email encryption standard from the 1980s — but today, the term is mostly used to describe a **file format** for storing and sharing **cryptographic data** like:
+
+- SSL/TLS certificates
+- Public and private keys
+- Certificate signing requests (CSRs)
+
+---
+
+### 📦 2. PEM as a File Format
+
+PEM files are:
+
+- **Text-based** (human-readable, base64-encoded)
+- **Wrapped with header and footer lines**
+
+For example:
+
+```
+-----BEGIN CERTIFICATE-----
+MIID...<base64 data>...ABCD
+-----END CERTIFICATE-----
+```
+
+or for a private key:
+
+```
+-----BEGIN PRIVATE KEY-----
+MIIE...<base64 data>...XYZ
+-----END PRIVATE KEY-----
+```
+
+This encoding makes it easy to store and copy the data safely in text files, emails, or configuration files.
+
+---
+
+### 🔐 3. PEM and OpenSSL
+
+**OpenSSL** is a popular open-source library and toolkit for encryption and TLS/SSL operations.
+It uses the PEM format extensively for:
+
+- Reading and writing certificates and keys
+- Converting between different formats (like DER, PFX, etc.)
+- Encrypting/decrypting private keys
+- Generating CSRs, self-signed certificates, etc.
+
+For example:
+
+```bash
+# View the contents of a PEM certificate
+openssl x509 -in certificate.pem -text -noout
+
+# Convert a DER certificate (binary) to PEM
+openssl x509 -in cert.der -out cert.pem -outform PEM
+
+# Encrypt a private key into PEM with a password
+openssl rsa -in key.pem -aes256 -out key-encrypted.pem
+```
+
+---
+
+### 🧩 4. Common PEM Variants
+
+Depending on what data they contain, PEM files might have different extensions and headers:
+
+| File Type     | Extension              | Header                                  |
+| ------------- | ---------------------- | --------------------------------------- |
+| Certificate   | `.pem`, `.crt`, `.cer` | `-----BEGIN CERTIFICATE-----`           |
+| Private Key   | `.pem`, `.key`         | `-----BEGIN PRIVATE KEY-----`           |
+| CSR (Request) | `.csr`                 | `-----BEGIN CERTIFICATE REQUEST-----`   |
+| Encrypted Key | `.pem`                 | `-----BEGIN ENCRYPTED PRIVATE KEY-----` |
+
+All are **PEM format**, just different kinds of data inside.
+
+---
+
+### 🧠 5. Why It Matters
+
+PEM is the **most common** format on Linux and Unix systems — including web servers like Nginx and Apache — because:
+
+- It’s text-based and easy to handle.
+- It’s compatible with OpenSSL.
+- It can be concatenated (you can include certificate + intermediate + root chain in one file).
+
+Windows systems often use **PFX / PKCS#12 (.pfx, .p12)** instead, which are **binary** and can store multiple certificates plus private keys in one file.
+
+---

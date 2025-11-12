@@ -1,0 +1,108 @@
+---
+title: 'Multiple Block PEM File'
+tags: [Network]
+date: 2025-11-12
+---
+
+---
+
+## 🧾 Example: Multi-block PEM File (`fullchain.pem`)
+
+This example shows **three PEM blocks** — a leaf (end-entity) certificate, an intermediate certificate, and a root certificate:
+
+```pem
+# ───────────────────────────────
+# 1️⃣  Leaf / Server Certificate
+# ───────────────────────────────
+-----BEGIN CERTIFICATE-----
+MIIDZTCCAk2gAwIBAgIUZkO4b21XlEq5w3rxh83e4W0ixmowDQYJKoZIhvcNAQEL
+BQAwRzELMAkGA1UEBhMCU0cxEjAQBgNVBAoMCU1pZGRsZVJvb3QxEzARBgNVBAMM
+Ck1pZGRsZSBSb290MB4XDTI1MDEwMTAwMDAwMFoXDTI2MDEwMTAwMDAwMFowRzEL
+MAkGA1UEBhMCU0cxEjAQBgNVBAoMCVNlcnZlciBDb3JwMRMwEQYDVQQDDAp3d3cu
+ZXhhbXBsZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCvXhbT
+aDz3pP1ivEZXEXAMPLEBASE64DATAz2qk4w0M5qjkaD6Jz7jA1Mbtv8gl
+-----END CERTIFICATE-----
+
+# ───────────────────────────────
+# 2️⃣  Intermediate Certificate
+# ───────────────────────────────
+-----BEGIN CERTIFICATE-----
+MIIDhTCCAm2gAwIBAgIUQ7oXEXAMPLEBASE64DATA++3QIDAQABMA0GCSqGSIb3DQEBCwUA
+A4IBAQBj9qjYTmXgXr6Rw1fwK7w4kyoTn6oMx8hR6TXbEwUuBQ...
+-----END CERTIFICATE-----
+
+# ───────────────────────────────
+# 3️⃣  Root Certificate
+# ───────────────────────────────
+-----BEGIN CERTIFICATE-----
+MIIDdjCCAl6gAwIBAgIUTEXAMPLEBASE64DATA4nM5n2bD4SxQIDAQABMA0GCSqGSIb3DQEB
+CwUAA4IBAQBkLkYxRCdYpZbF...
+-----END CERTIFICATE-----
+```
+
+---
+
+## 🧩 What These Blocks Mean
+
+| Block                            | Type                       | Role                                          | Verified By         |
+| -------------------------------- | -------------------------- | --------------------------------------------- | ------------------- |
+| **1️⃣ Leaf / Server certificate** | End-entity                 | Identifies your domain (`www.example.com`)    | The intermediate CA |
+| **2️⃣ Intermediate certificate**  | CA (Certificate Authority) | Links your leaf certificate to a trusted root | The root CA         |
+| **3️⃣ Root certificate**          | Trusted anchor             | Self-signed, pre-installed in browsers/OS     | — (trust anchor)    |
+
+Your web server usually serves the first **two** (leaf + intermediate) to clients; the **root** is already trusted on users’ systems.
+
+---
+
+## 🧠 Understanding “Subject” and “Issuer”
+
+Every X.509 certificate contains two key identity fields:
+
+| Field       | Meaning                                           | Example                                   |
+| ----------- | ------------------------------------------------- | ----------------------------------------- |
+| **Subject** | The entity the certificate belongs to (the owner) | `CN=www.example.com, O=Server Corp, C=SG` |
+| **Issuer**  | The entity that issued and signed the certificate | `CN=Middle Root, O=MiddleRoot CA, C=SG`   |
+
+So, for our chain:
+
+| Certificate      | Subject              | Issuer                        |
+| ---------------- | -------------------- | ----------------------------- |
+| **Leaf**         | `CN=www.example.com` | `CN=MiddleRoot CA`            |
+| **Intermediate** | `CN=MiddleRoot CA`   | `CN=TopRoot CA`               |
+| **Root**         | `CN=TopRoot CA`      | `CN=TopRoot CA` (self-signed) |
+
+This creates a **trust chain**:
+`Root → Intermediate → Leaf (your site)`
+
+---
+
+## 🧩 Checking Subjects and Issuers with OpenSSL
+
+You can inspect each block like this:
+
+```bash
+openssl x509 -in fullchain.pem -noout -subject -issuer
+```
+
+If you want to view all certificates inside one file:
+
+```bash
+awk 'BEGIN {c=0} /BEGIN CERT/ {c++} {print > "cert" c ".pem"}' fullchain.pem
+for f in cert*.pem; do
+  echo "== $f =="; openssl x509 -in "$f" -noout -subject -issuer
+done
+```
+
+This splits the multi-block PEM into separate files (`cert1.pem`, `cert2.pem`, etc.) and prints their subjects/issuers.
+
+---
+
+### 📈 Summary
+
+- **PEM**: Text format for certificates/keys.
+- **Multiple blocks**: Represent the **certificate chain**.
+- **Subject**: Who the certificate is for.
+- **Issuer**: Who signed it.
+- The chain ensures browsers can **verify trust** all the way to a known **root CA**.
+
+---

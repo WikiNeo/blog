@@ -1,53 +1,97 @@
 ---
-title: "Certificate and Private Key"
+title: 'How private key is used in digital certificate?'
 tags: [Network]
-date: 2025-07-03
-summary: A **certificate** and a **private key** are two essential components in **public key cryptography**, especially in systems like HTTPS, TLS/SSL, email encryption, and authentication.
+date: 2025-11-12
 ---
-
-A **certificate** and a **private key** are two essential components in **public key cryptography**, especially in systems like HTTPS, TLS/SSL, email encryption, and authentication. Here's a breakdown:
 
 ---
 
-### 🔐 **Private Key**
+## 🔐 1. The certificate–key pair
 
-- A secret key that **must be kept confidential**.
-- Used to:
+A **certificate** (usually `.crt`, `.pem`, or `.cer`) contains:
 
-  - **Decrypt** data encrypted with the corresponding public key.
-  - **Sign** data to prove authenticity and integrity.
+- Your **public key**
+- Identifying info (domain name, org, etc.)
+- A **signature** from a Certificate Authority (CA) verifying that info
 
-- Example format: PEM (Base64-encoded, starts with `-----BEGIN PRIVATE KEY-----`)
+The corresponding **private key** (e.g. `server.key`) is generated first and **never leaves your control**.
 
----
+**Together:**
 
-### 📄 **Certificate**
-
-- A public document that contains the **public key** and identity information (e.g., domain name, organization).
-- Issued and digitally signed by a **Certificate Authority (CA)**.
-- Used to:
-
-  - **Prove the identity** of a server or user.
-  - **Encrypt** data sent to the owner of the certificate.
-
-- Example format: PEM (Base64-encoded, starts with `-----BEGIN CERTIFICATE-----`)
+```
+Private key  <->  Public key (inside certificate)
+```
 
 ---
 
-### 🧩 Relationship
+## 🧭 2. How the private key is used
 
-- The **private key and certificate** form a key pair:
+### (a) During **SSL/TLS handshake**
 
-  - Anything encrypted with the **public key (in the certificate)** can only be decrypted with the **private key**.
-  - Anything signed with the **private key** can be verified using the **public key**.
+When a client (e.g., browser) connects:
+
+1. The server sends its **certificate** (public key).
+2. The client verifies the certificate (trust chain → CA).
+3. To prove it owns the certificate, the server must **sign a random challenge** using its **private key**.
+4. The client checks the signature using the **public key** in the cert.
+
+✅ This proves:
+
+- The server is the rightful owner of the certificate.
+- The connection isn’t being intercepted.
 
 ---
 
-### Example Use Case in HTTPS (TLS):
+### (b) For **decryption**
 
-1. Server sends its **certificate** to the client.
-2. Client verifies the certificate via trusted CAs.
-3. Client uses the public key in the certificate to encrypt a secret.
-4. Server uses its **private key** to decrypt that secret and establish a secure session.
+In some handshake modes (like RSA key exchange), the server’s private key decrypts the “premaster secret” sent by the client.
+Modern TLS (with ECDHE) usually doesn’t use the private key for decryption directly — only for signing — which improves security (forward secrecy).
+
+---
+
+### (c) For **signing other certificates**
+
+If the certificate is for a **Certificate Authority (CA)**, its private key is used to **sign** other certificates:
+
+```
+CA private key → signs → server certificates
+```
+
+This creates a **trust chain** (Root CA → Intermediate CA → Server).
+
+---
+
+## ⚙️ 3. Where it lives
+
+- On web servers: `/etc/ssl/private/server.key` (permissions 600, owned by root)
+- On client apps: inside secure key stores (macOS Keychain, Windows cert store)
+- For cloud-managed certs: the cloud provider handles the private key (e.g., Google-managed certificates)
+
+---
+
+## 🧾 4. Practical example
+
+When using NGINX:
+
+```nginx
+server {
+    listen 443 ssl;
+    ssl_certificate     /etc/ssl/certs/server.crt;
+    ssl_certificate_key /etc/ssl/private/server.key;
+}
+```
+
+Here:
+
+- `server.crt` = certificate (public key + CA signature)
+- `server.key` = private key used for TLS handshakes
+
+---
+
+## 🚨 5. Security rule of thumb
+
+- **Never share the private key** — not with clients, not with CAs.
+- **Never commit it to Git** or cloud storage.
+- If compromised → regenerate key + reissue certificate immediately.
 
 ---
