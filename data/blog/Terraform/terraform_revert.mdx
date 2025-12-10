@@ -1,0 +1,121 @@
+---
+title: 'How to revert Terraform changes?'
+tags: [Terraform]
+date: 2025-12-10
+---
+
+Reverting Terraform plan changes depends on **what stage you are at**: before applying, after applying, or after partially applying. Here’s the clear breakdown.
+
+---
+
+## ✅ **1. If you have NOT applied yet (`terraform apply` not run)**
+
+Good news — **nothing has changed in real infrastructure yet.**
+
+To revert:
+
+### **Option A — Discard local changes**
+
+If you changed `.tf` files and no longer want those changes:
+
+```sh
+git checkout -- .
+```
+
+(or whatever version-control method you use).
+
+Then run:
+
+```sh
+terraform plan
+```
+
+You should now see no changes.
+
+---
+
+## ✅ **2. If you already APPLIED the plan (`terraform apply` completed)**
+
+Terraform itself **cannot "undo"** changes automatically.
+To revert:
+
+### **Option A — Restore previous configuration and re-apply**
+
+1. Check out the older version from Git (or backup):
+
+```sh
+git checkout <previous_commit>
+```
+
+2. Apply again:
+
+```sh
+terraform apply
+```
+
+Terraform will then produce a new plan that “undoes” whatever the last apply changed.
+
+---
+
+## ✅ **3. If you applied changes but want to roll back ONLY some resources**
+
+You must restore the previous desired state in your `.tf` files.
+
+Terraform will then:
+
+- Delete resources that should not exist
+- Recreate resources with old attributes
+- Update resources to previous settings
+
+There is **no single rollback command** — reversion is achieved by re-applying the old configuration.
+
+---
+
+## ✅ **4. If apply FAILED halfway (partial apply)**
+
+Terraform state may contain partially created resources.
+
+To revert:
+
+### **Option A — Fix configuration, then apply again**
+
+Terraform will detect drift and correct it.
+
+### **Option B — Manually remove bad resources from state**
+
+Use only if necessary:
+
+```sh
+terraform state rm <resource>
+```
+
+Then re-run:
+
+```sh
+terraform apply
+```
+
+---
+
+## ❌ **What does NOT exist**
+
+Terraform has no:
+
+- `terraform undo`
+- `terraform rollback`
+- automatic revert mechanism
+
+Everything is done by **changing code back** and running `apply`.
+
+---
+
+## 📌 If you want truly reversible deployments
+
+Use:
+
+- Git versioning for `.tf` files
+- Terraform workspaces (sometimes)
+- Terragrunt with versioned configurations
+- CI pipelines that apply from tagged releases
+
+---
