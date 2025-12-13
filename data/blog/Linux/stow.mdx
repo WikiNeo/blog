@@ -1,0 +1,160 @@
+---
+title: "GNU stow command"
+tags: [Linux]
+date: 2025-12-13
+summary: "GNU stow is a symlink manager"
+---
+
+**GNU Stow** is a symlink manager, commonly used to manage **dotfiles** cleanly across systems (very popular with Arch/CachyOS + Hyprland users like you).
+
+---
+
+## What `stow` does (in one sentence)
+
+`stow` **creates symlinks** from a central dotfiles directory into your `$HOME`, instead of copying files around.
+
+---
+
+## Typical dotfiles layout
+
+Example (very close to what you’re already using):
+
+```text
+~/dotfiles/
+├── hypr/
+│   └── .config/
+│       └── hypr/
+│           └── hyprland.conf
+├── waybar/
+│   └── .config/
+│       └── waybar/
+│           └── config.jsonc
+├── wofi/
+│   └── .config/
+│       └── wofi/
+│           └── style.css
+```
+
+Each **top-level folder** (`hypr`, `waybar`, `wofi`) is called a **package**.
+
+---
+
+## Basic stow command
+
+Run this **inside the dotfiles directory**:
+
+```bash
+cd ~/dotfiles
+stow hypr
+```
+
+This creates:
+
+```text
+~/.config/hypr -> ~/dotfiles/hypr/.config/hypr
+```
+
+No files are copied — only symlinks.
+
+---
+
+## Stow multiple packages
+
+```bash
+stow hypr waybar wofi
+```
+
+---
+
+## Dry run (VERY useful)
+
+See what will happen **without touching anything**:
+
+```bash
+stow -n -v hypr
+```
+
+* `-n` → no-op (dry run)
+* `-v` → verbose output
+
+---
+
+## Unstow (remove symlinks)
+
+To **remove** symlinks created by stow:
+
+```bash
+stow -D hypr
+```
+
+This does **not delete your real files**, only the symlinks.
+
+---
+
+## Common options you’ll use
+
+| Command           | Meaning                      |
+| ----------------- | ---------------------------- |
+| `stow hypr`       | Create symlinks              |
+| `stow -D hypr`    | Remove symlinks              |
+| `stow -n -v hypr` | Dry-run + verbose            |
+| `stow -R hypr`    | Restow (unstow + stow again) |
+
+---
+
+## Why stow complained in your earlier setup
+
+You saw errors like:
+
+```text
+existing target is stowed to a different package
+```
+
+This happens when:
+
+* Two packages try to manage the **same target path**, e.g.
+
+  * `hypr/.config/config`
+  * `waybar/.config/config`
+
+### Rule of thumb
+
+> **One path = one stow package**
+
+Shared files should live in:
+
+* a **common package**, or
+* be symlinked manually
+
+---
+
+## Best practice for Hyprland setups (recommended)
+
+```text
+dotfiles/
+├── hypr/
+│   └── .config/hypr/
+├── waybar/
+│   └── .config/waybar/
+├── wofi/
+│   └── .config/wofi/
+├── swaync/
+│   └── .config/swaync/
+```
+
+Never do:
+
+```text
+hypr/.config/config
+waybar/.config/config   ❌
+```
+
+---
+
+## TL;DR
+
+* `stow` = **symlink manager**
+* Run it from inside your dotfiles folder
+* One package per config directory
+* Use `-n -v` before committing changes
+* Use `-D` to cleanly undo
