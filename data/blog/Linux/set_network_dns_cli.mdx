@@ -1,0 +1,78 @@
+---
+title: 'How to Set Network DNS via Command Line Interface (CLI) on Linux'
+tags: [Linux]
+date: 2025-12-15
+---
+
+List the connections with:
+
+```shell
+nmcli device
+```
+
+Assume the active connection is **`Wired connection 1`** on **`enp2s0`**, set DNS to **8.8.8.8** like this:
+
+---
+
+## ✅ Set DNS to 8.8.8.8 (NetworkManager / nmcli)
+
+```bash
+nmcli connection modify "Wired connection 1" ipv4.ignore-auto-dns yes
+nmcli connection modify "Wired connection 1" ipv4.dns "8.8.8.8"
+```
+
+Apply the change:
+
+```bash
+nmcli connection down "Wired connection 1"
+nmcli connection up "Wired connection 1"
+```
+
+---
+
+## 🔍 Verify DNS is active
+
+```bash
+nmcli device show enp2s0 | grep DNS
+```
+
+You should see:
+
+```
+IP4.DNS[1]: 8.8.8.8
+```
+
+Or:
+
+```bash
+resolvectl status enp2s0
+```
+
+---
+
+## 🧠 Notes (important on CachyOS / Arch)
+
+- `ipv4.ignore-auto-dns yes` prevents DHCP from overwriting your DNS
+- This survives reboot
+- Works cleanly with **systemd-resolved** (default on CachyOS)
+
+---
+
+## ➕ Optional: add fallback DNS
+
+```bash
+nmcli connection modify "Wired connection 1" ipv4.dns "8.8.8.8 1.1.1.1"
+```
+
+---
+
+## 🔄 Roll back to DHCP DNS (if needed)
+
+```bash
+nmcli connection modify "Wired connection 1" ipv4.ignore-auto-dns no
+nmcli connection modify "Wired connection 1" ipv4.dns ""
+nmcli connection down "Wired connection 1"
+nmcli connection up "Wired connection 1"
+```
+
+---
