@@ -4,10 +4,106 @@ tags: [Neovim]
 date: 2021-04-20
 ---
 
-```vimscript
+---
+
+## The command
+
+```
 :'<,'>g/^$/d
 ```
 
-## Reference
+---
 
-- [https://stackoverflow.com/questions/1807570/vim-delete-empty-lines-within-a-visual-selected-area](https://stackoverflow.com/questions/1807570/vim-delete-empty-lines-within-a-visual-selected-area)
+## 1️⃣ `'<,'>` — the range (your visual selection)
+
+* `'<` = start of the last **Visual selection**
+* `'>` = end of the last **Visual selection**
+* Together, `'<,'>` means:
+
+👉 **Apply the command only to the lines you selected in Visual mode**
+
+So this command **does not affect the whole file**, only the selected block.
+
+---
+
+## 2️⃣ `g` — global command (within the range)
+
+* `g/pattern/command`
+* For **each line matching `pattern`**, run `command`
+
+Here, it means:
+👉 *For every line in the selected range that matches the pattern…*
+
+---
+
+## 3️⃣ `/^$/` — the pattern (empty lines)
+
+Regex breakdown:
+
+* `^` = start of line
+* `$` = end of line
+* Nothing between them → **line contains nothing**
+
+👉 Matches **empty lines only**
+
+* Does **not** match lines with spaces or tabs
+
+(If you want whitespace-only lines too, see below.)
+
+---
+
+## 4️⃣ `d` — delete
+
+* `d` = delete the matched line
+
+---
+
+## ✅ Final meaning (plain English)
+
+> **Delete all empty lines inside the selected region.**
+
+---
+
+## Common variations (very useful)
+
+### 🔹 Delete empty lines in the entire file
+
+```
+:g/^$/d
+```
+
+---
+
+### 🔹 Delete empty *and whitespace-only* lines
+
+```
+:'<,'>g/^\s*$/d
+```
+
+* `\s*` = any amount of whitespace (spaces, tabs)
+
+---
+
+### 🔹 Inverse: delete all **non-empty** lines in selection
+
+```
+:'<,'>g!/^$/d
+```
+
+or
+
+```
+:'<,'>v/^$/d
+```
+
+---
+
+## Typical workflow (how you’d use it)
+
+1. Press `V` (or `v`) to select lines
+2. Adjust selection
+3. Type `:` (Vim auto-fills `'<,'>`)
+4. Enter `g/^$/d`
+5. Press `Enter`
+
+---
