@@ -1,0 +1,143 @@
+---
+title: 'BORE Scheduler'
+tags: [Linux]
+date: 2025-12-16
+---
+
+**BORE Scheduler** stands for **Burst-Oriented Response Enhancer**.
+It’s an **alternative Linux CPU scheduler** designed to make desktops feel _more responsive_, especially under mixed or heavy system load.
+
+Since you’re using **CachyOS with Hyprland**, this is particularly relevant—BORE is one of the reasons CachyOS often feels very “snappy”.
+
+---
+
+## What problem does BORE try to solve?
+
+The default Linux scheduler (**CFS – Completely Fair Scheduler**) is excellent for servers and throughput, but on desktops it can feel less responsive when:
+
+- a game is compiling shaders
+- a browser tab goes wild
+- background tasks spike CPU
+- multiple apps wake up at once
+
+CFS treats CPU time _fairly_, not _urgently_.
+
+BORE asks a different question:
+
+> **“Which task needs the CPU _right now_ to keep the system responsive?”**
+
+---
+
+## Core idea of BORE
+
+**Short CPU bursts = interactive tasks = higher priority**
+
+Examples:
+
+- moving a window
+- typing in a terminal
+- scrolling a webpage
+- compositor (Hyprland) rendering
+- game main thread
+
+**Long continuous CPU usage = background work**
+
+- compiling
+- video encoding
+- shader pre-caching
+- AI workloads
+
+BORE detects this automatically by tracking **burst time**.
+
+---
+
+## How BORE works (simplified)
+
+1. Each task has a **burst score**
+
+   - short bursts → low score → high priority
+   - long bursts → high score → lower priority
+
+2. Scheduler dynamically:
+
+   - boosts interactive tasks
+   - gently pushes background hogs out of the way
+
+3. No user tagging required
+
+   - no need for `nice`, `ionice`, or manual tuning
+
+---
+
+## Why BORE feels good on desktops
+
+Compared to CFS, BORE typically gives:
+
+- 🚀 **snappier UI**
+- 🪟 smoother window animations (great for Hyprland)
+- 🎮 more consistent frame pacing in games
+- 🖱️ better mouse/keyboard responsiveness under load
+
+Especially noticeable when:
+
+- gaming + browser + Discord
+- Steam shader compilation in background
+- multiple Electron apps open
+
+---
+
+## BORE vs other schedulers
+
+| Scheduler | Best for            | Notes                                 |
+| --------- | ------------------- | ------------------------------------- |
+| **CFS**   | Servers, fairness   | Default Linux scheduler               |
+| **BORE**  | Desktop, gaming     | Low-latency, responsive               |
+| **ECHO**  | Desktop             | Earlier interactive-focused scheduler |
+| **MuQSS** | Extreme low latency | Less scalable, niche                  |
+| **EEVDF** | Modern fairness     | Now in mainline Linux                 |
+
+BORE is **not mainline** yet, but is well-tested in desktop-focused distros like CachyOS.
+
+---
+
+## Why CachyOS uses / offers BORE
+
+CachyOS focuses on:
+
+- desktop responsiveness
+- gaming performance
+- low-latency tuning
+
+BORE pairs very well with:
+
+- **Hyprland**
+- **NVIDIA drivers**
+- **gamescope**
+- high-refresh-rate displays (your 144 Hz Philips fits perfectly)
+
+On your **i5-10400F + RTX 3080**, BORE helps ensure:
+
+- the game thread doesn’t get delayed by background CPU noise
+- the compositor stays smooth even when CPU usage spikes
+
+---
+
+## Downsides / trade-offs
+
+To be fair:
+
+- ❌ slightly worse for long batch jobs
+- ❌ not ideal for heavy server workloads
+- ❌ not upstream Linux (yet)
+
+For a **desktop / gaming machine**, these are usually irrelevant.
+
+---
+
+## TL;DR
+
+**BORE Scheduler** is a Linux CPU scheduler that:
+
+- prioritizes **short, interactive CPU bursts**
+- improves **desktop responsiveness and gaming smoothness**
+- works especially well on **CachyOS + Hyprland**
