@@ -1,0 +1,212 @@
+---
+title: 'EEVDF, sched-ext, ECHO and RT Scheduler'
+tags: [Linux]
+date: 2025-12-16
+---
+
+
+
+---
+
+## 1️⃣ **EEVDF (Earliest Eligible Virtual Deadline First)**
+
+**Status:** Upstream Linux default (since Linux 6.6)
+
+### What it is
+
+EEVDF is the **modern replacement for CFS** (Completely Fair Scheduler).
+It is a **deadline-based scheduler** designed to improve **fairness, latency, and interactivity**.
+
+Instead of “who ran least recently?”, it asks:
+
+> *Who has the earliest virtual deadline and is eligible to run now?*
+
+### Why it exists
+
+CFS struggled with:
+
+* Bursty interactive workloads
+* Low-latency desktop responsiveness
+* Edge cases with fairness under mixed loads
+
+EEVDF fixes these while remaining **fully fair and general-purpose**.
+
+### Key characteristics
+
+* ⚖️ Strict fairness guarantees
+* ⚡ Lower scheduling latency than CFS
+* 🧠 Better handling of interactive bursts (UI, browsers, games)
+* 🔄 Fully upstream and well-tested
+
+### How it feels in practice
+
+* Smooth desktop
+* Consistent frame pacing
+* No surprises under load
+
+### Best for
+
+✅ **General desktop use**
+✅ **Gaming + background tasks**
+✅ **Coding, compiling, browsing simultaneously**
+
+👉 If you want **“it just works”**, this is the safe baseline.
+
+---
+
+## 2️⃣ **sched-ext (Scheduler Extensions)**
+
+**Status:** Experimental but upstream framework
+
+### What it is
+
+`sched-ext` is **not a scheduler**, but a **framework** that allows **user-space schedulers** written in **BPF** to control task scheduling.
+
+Think of it as:
+
+> *“Pluggable scheduling logic without recompiling the kernel.”*
+
+### Why it exists
+
+Kernel scheduling experimentation is:
+
+* Hard
+* Slow
+* Risky
+
+sched-ext allows:
+
+* Rapid prototyping
+* Custom schedulers per workload
+* Research & experimentation
+
+### Key characteristics
+
+* 🧩 User-space defined scheduling logic
+* 🔬 Ideal for experimentation
+* ⚠️ Can be unstable depending on the scheduler used
+* 🧠 Extremely flexible
+
+### How it feels in practice
+
+* Depends entirely on the scheduler plugged in
+* Can be amazing or terrible
+* Debugging requires expertise
+
+### Best for
+
+✅ Scheduler developers
+✅ Researchers
+✅ Power users experimenting with custom policies
+
+❌ Not ideal for daily gaming or productivity (yet)
+
+---
+
+## 3️⃣ **ECHO Scheduler**
+
+**Status:** Out-of-tree / niche (CachyOS custom)
+
+### What it is
+
+ECHO is a **latency-oriented scheduler** designed for:
+
+* **Fast wake-ups**
+* **Minimal overhead**
+* **Desktop responsiveness**
+
+It prioritizes:
+
+* Recently interactive tasks
+* UI-related workloads
+* Short CPU bursts
+
+### Design philosophy
+
+> *“Responsiveness first, fairness second.”*
+
+Unlike EEVDF:
+
+* Less strict fairness
+* More aggressive prioritization of interactive tasks
+
+### Key characteristics
+
+* ⚡ Very snappy UI
+* 🎮 Good for gaming input latency
+* 📉 Can reduce throughput fairness under heavy load
+* 🧪 Less tested than EEVDF
+
+### How it feels in practice
+
+* Very “light”
+* UI reacts instantly
+* Heavy background jobs may feel deprioritized
+
+### Best for
+
+✅ **Gaming-focused systems**
+✅ **Minimal background workloads**
+✅ **Low-latency desktop feel**
+
+❌ Not ideal if you compile kernels while gaming
+
+---
+
+## 4️⃣ **RT (Real-Time Scheduler)**
+
+**Status:** Linux core (SCHED_FIFO / SCHED_RR)
+
+### What it is
+
+RT scheduling is **hard priority scheduling**:
+
+* RT tasks **always preempt** normal tasks
+* No fairness guarantees
+* Can **lock up your system** if misused
+
+### Types
+
+* **SCHED_FIFO** – runs until it blocks or yields
+* **SCHED_RR** – round-robin among RT tasks
+
+### Key characteristics
+
+* 🚨 Absolute priority
+* ⛔ Can starve the system
+* 🎯 Deterministic timing
+
+### How it feels in practice
+
+* Used by:
+
+  * Audio engines (JACK, PipeWire RT threads)
+  * Industrial control
+  * Robotics
+
+### Best for
+
+✅ **Audio production**
+✅ **Hard real-time requirements**
+
+❌ **Never** use as a general desktop scheduler
+
+---
+
+## 🔎 Quick Comparison
+
+| Scheduler     | Goal            | Fairness | Latency | Stability | Recommended |
+| ------------- | --------------- | -------- | ------- | --------- | ----------- |
+| **EEVDF**     | General purpose | ⭐⭐⭐⭐     | ⭐⭐⭐⭐    | ⭐⭐⭐⭐⭐     | ✅ Default   |
+| **sched-ext** | Experimentation | Depends  | Depends | ⭐⭐        | ⚠️ Advanced |
+| **ECHO**      | Desktop latency | ⭐⭐       | ⭐⭐⭐⭐⭐   | ⭐⭐⭐       | ⚠️ Gaming   |
+| **RT**        | Determinism     | ❌        | ⭐⭐⭐⭐⭐   | ⭐⭐⭐⭐      | ❌ Desktop   |
+
+---
+
+## 🧠 Practical Advice for *Your* Setup (CachyOS + Hyprland + RTX 3080)
+
+* **EEVDF** → Best balance for **gaming + coding**
+* **ECHO** → Try if you want *maximum snappiness* and minimal background load
+* **sched-ext** → Only if you enjoy kernel experimentation
+* **RT** → Leave it alone unless doing audio or robotics
