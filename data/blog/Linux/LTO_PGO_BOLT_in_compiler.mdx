@@ -1,0 +1,189 @@
+---
+title: 'LTO, PGO, BOLT in compiler'
+tags: [Linux]
+date: 2025-12-16
+---
+
+Below is a **clear, practical explanation** of **LTO, PGO, and BOLT**, without compiler-theory fluff.
+
+---
+
+## 1️⃣ LTO — _Link Time Optimization_
+
+### What it is
+
+**LTO** lets the compiler optimize **across multiple source files** _at link time_, instead of treating each `.c/.cpp` file in isolation.
+
+Normally:
+
+- Each file is compiled separately → optimizer has limited view
+
+With **LTO**:
+
+- The compiler sees the **entire program as one unit**
+- Can perform deeper, global optimizations
+
+### What it enables
+
+- Inlining functions **across files**
+- Removing unused code more aggressively
+- Better register allocation
+- Smarter dead-code elimination
+
+### Why it’s faster
+
+Less function call overhead, tighter instruction flow, fewer cache misses.
+
+### Downsides
+
+- Longer compile times
+- Higher memory usage during build
+
+### TL;DR
+
+> **LTO = “whole-program optimization”**
+
+---
+
+## 2️⃣ PGO — _Profile Guided Optimization_
+
+### What it is
+
+**PGO** optimizes based on **how the program actually runs**, not just theoretical heuristics.
+
+### How it works (2-step build)
+
+1. **Instrumented build**
+
+   - Compiler inserts counters
+
+2. **Training run**
+
+   - Program is run with real workloads
+
+3. **Final optimized build**
+
+   - Compiler uses collected data
+
+### What it improves
+
+- Branch prediction (if/else paths)
+- Hot vs cold code placement
+- Loop unrolling decisions
+- Function inlining choices
+
+### Why it’s powerful
+
+The compiler stops _guessing_ and starts optimizing based on **real usage**.
+
+### Where it helps most
+
+- Browsers (Firefox)
+- Compilers (clang/gcc)
+- Interpreters (Python, JS engines)
+- Large C++ apps
+
+### Downsides
+
+- More complex build process
+- Quality depends on training workload
+
+### TL;DR
+
+> **PGO = “optimize for real-world behavior”**
+
+---
+
+## 3️⃣ BOLT — _Binary Optimization and Layout Tool_
+
+### What it is
+
+**BOLT** is a **post-link binary optimizer** developed by Meta.
+
+Unlike LTO/PGO:
+
+- Works **after the binary is already built**
+- Rewrites the final executable
+
+### What it optimizes
+
+- Function layout in memory
+- Basic block reordering
+- Instruction cache locality
+- Branch alignment
+
+### Why it’s special
+
+- Improves **CPU instruction cache & branch prediction**
+- Especially effective on **large binaries**
+
+### Typical gains
+
+- Faster startup
+- Better instruction cache hit rate
+- Reduced branch mispredictions
+
+### Where it’s used
+
+- Firefox
+- LLVM/Clang
+- Large system daemons
+
+### Downsides
+
+- Needs profile data
+- Limited to supported architectures (x86_64 mostly)
+
+### TL;DR
+
+> **BOLT = “re-arrange compiled code to run better on real CPUs”**
+
+---
+
+## 🔁 How They Work Together (CachyOS style)
+
+| Stage     | Optimization                  |
+| --------- | ----------------------------- |
+| Compile   | PGO (learn runtime behavior)  |
+| Link      | LTO (global optimization)     |
+| Post-link | BOLT (memory & layout tuning) |
+
+This stack is **aggressive** and **rare outside performance-focused distros**.
+
+---
+
+## 🎯 What This Means for _You_ (CachyOS + Your Hardware)
+
+Given your setup:
+
+- **i5-10400F**
+- **RTX 3080**
+- **Hyprland + gaming + coding**
+
+### You benefit most in:
+
+- Lower desktop latency
+- Faster app startup
+- Slightly smoother frame pacing
+- Faster toolchains (gcc/clang, cmake, rust builds)
+- More responsive browsers & terminals
+
+### What you _won’t_ see:
+
+- Massive FPS jumps in GPU-bound games
+- Night-and-day performance differences
+
+### Realistic expectation
+
+- **3–10% gains** depending on workload
+- More _“snappy”_ system feel rather than raw FPS
+
+---
+
+## 🧠 One-Line Summary
+
+> **LTO** makes the compiler smarter globally
+> **PGO** teaches the compiler how programs _actually_ behave
+> **BOLT** rearranges final binaries for modern CPUs
+
+Together, they’re why CachyOS feels **noticeably sharper** than stock Arch — even on the same hardware.
