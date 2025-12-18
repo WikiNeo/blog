@@ -1,0 +1,63 @@
+---
+title: 'Docker RUN --mount'
+tags: [Docker]
+date: 2025-12-18
+---
+
+When you use `--mount` in a Dockerfile, it **must appear immediately after `RUN`**, before the command.
+This is required because `--mount` is a **flag to `RUN`**, not part of the shell command.
+
+### ❌ Incorrect
+
+```dockerfile
+RUN echo "Hello" --mount=type=cache,target=/root/.cache
+```
+
+```dockerfile
+RUN apt-get update && \
+    --mount=type=cache,target=/var/lib/apt \
+    apt-get install -y curl
+```
+
+### ✅ Correct
+
+```dockerfile
+RUN --mount=type=cache,target=/root/.cache \
+    echo "Hello"
+```
+
+```dockerfile
+RUN --mount=type=cache,target=/var/lib/apt \
+    apt-get update && apt-get install -y curl
+```
+
+### Common `--mount` types
+
+```dockerfile
+RUN --mount=type=cache,target=/root/.cache
+RUN --mount=type=secret,id=mysecret
+RUN --mount=type=bind,source=.,target=/src
+```
+
+### Important requirements
+
+1. **BuildKit must be enabled**
+
+   ```bash
+   DOCKER_BUILDKIT=1 docker build .
+   ```
+
+   or Docker Desktop (enabled by default).
+
+2. Syntax must be **exactly**
+
+   ```dockerfile
+   RUN --mount=... <command>
+   ```
+
+### Why Docker is strict
+
+Docker parses the Dockerfile **before** running a shell.
+Anything after `RUN` that starts with `--` is treated as a **RUN option**, not shell syntax.
+
+---

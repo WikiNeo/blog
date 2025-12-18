@@ -1,0 +1,146 @@
+---
+title: 'uv venv VS python -m venv'
+tags: [Python]
+date: 2025-12-18
+---
+
+---
+
+## TL;DR
+
+| Feature                   | `uv venv`                                       | `python -m venv`                    |
+| ------------------------- | ----------------------------------------------- | ----------------------------------- |
+| Purpose                   | Create a virtual environment optimized for `uv` | Standard Python virtual environment |
+| Speed                     | ⚡ Very fast                                    | 🐢 Normal                           |
+| Python version management | ✅ Can auto-download Python                     | ❌ Uses system Python               |
+| Reproducibility           | ✅ Integrated with `uv.lock`                    | ❌ Manual                           |
+| Tooling integration       | Deep `uv` integration                           | Works with any tool                 |
+| Standard library          | ❌ External tool                                | ✅ Built-in                         |
+
+---
+
+## `python -m venv` (Standard & Universal)
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+```
+
+### Pros
+
+- Built into Python (no extra tools)
+- Works everywhere
+- Well-understood and predictable
+- Ideal for simple scripts and legacy workflows
+
+### Cons
+
+- Uses **whatever Python is installed**
+- Slow environment creation
+- No dependency locking or Python version pinning
+
+### Best when
+
+- You want **maximum portability**
+- You’re not using `uv` for dependency management
+- You’re working in constrained environments (CI images, minimal containers)
+
+---
+
+## `uv venv` (Modern, Fast, Reproducible)
+
+```bash
+uv venv .venv
+source .venv/bin/activate
+```
+
+### Pros
+
+- ⚡ **Extremely fast** (often instant)
+- Can **download and pin Python versions**
+- Automatically compatible with:
+
+  - `uv add`
+  - `uv pip install`
+  - `uv sync`
+
+- Works seamlessly with `uv.lock`
+- Ideal for reproducible builds
+
+### Cons
+
+- Requires installing `uv`
+- Tighter coupling to `uv` ecosystem
+- Less familiar to teams used to pure `pip`
+
+### Best when
+
+- You already use **`uv add`, `uv sync`, or `uv pip install`**
+- You care about **reproducibility**
+- You want **Python version isolation without pyenv**
+- You’re building **containers or CI pipelines**
+
+---
+
+## Key Difference That Matters Most
+
+### Python version handling
+
+```bash
+python -m venv
+# Uses: system Python
+
+uv venv
+# Can auto-download the exact Python version
+```
+
+Example:
+
+```bash
+uv venv --python 3.11
+```
+
+No `pyenv`. No system Python conflicts.
+
+---
+
+## Typical `uv` Workflow (Recommended)
+
+```bash
+uv venv
+source .venv/bin/activate
+uv add requests
+uv sync
+```
+
+This gives you:
+
+- Locked dependencies
+- Consistent Python version
+- Fast installs
+- Reproducible environments
+
+---
+
+## Docker Note (Relevant to Your Previous Context)
+
+In Dockerfiles:
+
+- Prefer `uv venv` + `uv sync`
+- Avoid activating venv (just use full path)
+- Works well with private PyPI / Artifactory setups
+
+Example:
+
+```dockerfile
+RUN uv venv /opt/venv \
+ && /opt/venv/bin/uv sync
+```
+
+---
+
+## Recommendation
+
+- **Already using `uv`?** → **Use `uv venv`**
+- **Need universal compatibility?** → `python -m venv`
+- **CI / Docker / reproducibility?** → **`uv venv`**

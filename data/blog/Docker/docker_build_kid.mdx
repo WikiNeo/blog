@@ -1,0 +1,162 @@
+---
+title: 'Docker BuildKit'
+tags: [Docker]
+date: 2025-12-18
+---
+
+**BuildKit** is Docker’s **modern build engine** — it’s the part of Docker that actually _builds images_, and it replaces the old, slower “legacy builder”.
+
+Think of it as:
+
+> **“Docker build, but faster, smarter, and more powerful.”**
+
+---
+
+## What BuildKit does (in plain terms)
+
+BuildKit improves **how Docker builds images**:
+
+- 🚀 **Much faster builds**
+- 🧠 **Smarter caching**
+- 🔒 **Secure handling of secrets**
+- 🧩 **More advanced Dockerfile features**
+- 🔁 **Parallel execution**
+
+The legacy builder could only do things **step by step**.
+BuildKit analyzes the Dockerfile and builds **what it can in parallel**.
+
+---
+
+## Features you only get with BuildKit
+
+### 1️⃣ `RUN --mount` (what you just saw)
+
+```dockerfile
+RUN --mount=type=cache,target=/root/.cache \
+    pip install -r requirements.txt
+```
+
+- Caches dependencies between builds
+- No cache baked into the final image
+
+---
+
+### 2️⃣ Secrets without leaking them
+
+```dockerfile
+RUN --mount=type=secret,id=npmrc \
+    npm install
+```
+
+- Secrets never end up in image layers
+- Much safer than `ARG` or `ENV`
+
+Build command:
+
+```bash
+docker build --secret id=npmrc,src=$HOME/.npmrc .
+```
+
+---
+
+### 3️⃣ Better caching (huge speed boost)
+
+BuildKit:
+
+- Caches individual commands
+- Reuses cache more accurately
+- Avoids invalidating unrelated layers
+
+Result: **small changes don’t rebuild everything**
+
+---
+
+### 4️⃣ Parallel build steps
+
+Example:
+
+```dockerfile
+FROM node:20 AS frontend
+# build frontend
+
+FROM python:3.12 AS backend
+# build backend
+```
+
+BuildKit builds these **at the same time**.
+
+---
+
+### 5️⃣ Cleaner multi-stage builds
+
+BuildKit understands dependencies between stages and skips unnecessary work.
+
+---
+
+## Is BuildKit enabled by default?
+
+### Docker Desktop (Mac / Windows)
+
+✅ **Yes**, enabled by default
+
+### Linux
+
+Usually **yes**, but can be forced:
+
+```bash
+export DOCKER_BUILDKIT=1
+```
+
+Or permanently:
+
+```bash
+~/.docker/config.json
+{
+  "features": {
+    "buildkit": true
+  }
+}
+```
+
+---
+
+## How to tell if you’re using BuildKit
+
+You’ll see output like:
+
+```
+# syntax=docker/dockerfile:1
+ => [internal] load build definition from Dockerfile
+```
+
+Or this error (classic sign):
+
+```
+--mount is not allowed in legacy builder
+```
+
+---
+
+## Legacy builder vs BuildKit (quick table)
+
+| Feature         | Legacy | BuildKit |
+| --------------- | ------ | -------- |
+| Parallel builds | ❌     | ✅       |
+| `RUN --mount`   | ❌     | ✅       |
+| Secrets         | ❌     | ✅       |
+| Better cache    | ❌     | ✅       |
+| Faster          | ❌     | ✅       |
+
+---
+
+## When should you care?
+
+You **should care** if you:
+
+- Build images often
+- Use CI/CD
+- Want faster builds
+- Need secrets during build
+- Use modern Dockerfiles
+
+Which is… basically **everyone now** 😄

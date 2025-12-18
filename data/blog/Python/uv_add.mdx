@@ -1,0 +1,142 @@
+---
+title: 'uv add VS uv pip install'
+tags: [Python]
+date: 2025-12-18
+---
+
+Here’s the **practical difference between `uv add` and `uv pip install`**, and when you should use each.
+
+---
+
+## TL;DR
+
+| Command              | Purpose                              | Modifies project files         | Typical use                   |
+| -------------------- | ------------------------------------ | ------------------------------ | ----------------------------- |
+| **`uv add`**         | Add a dependency to a project        | ✅ `pyproject.toml` + lockfile | Project dependency management |
+| **`uv pip install`** | Install packages into an environment | ❌ No project metadata         | CI, Docker, ad-hoc installs   |
+
+---
+
+## `uv add` (project-aware)
+
+**What it does**
+
+- Adds a dependency to **`pyproject.toml`**
+- Updates **`uv.lock`**
+- Installs the dependency into the environment
+- Ensures reproducible builds
+
+**Example**
+
+```bash
+uv add requests
+```
+
+**Result**
+
+```toml
+# pyproject.toml
+[project]
+dependencies = [
+  "requests>=2.31.0"
+]
+```
+
+**Best for**
+
+- Application development
+- Libraries
+- When you want dependencies tracked and locked
+- Reproducible environments
+
+**Think of it as**
+
+> `poetry add` / `pipenv install`
+
+---
+
+## `uv pip install` (pip-compatible)
+
+**What it does**
+
+- Acts like `pip install`
+- Installs packages into the environment
+- **Does NOT update** `pyproject.toml` or `uv.lock`
+
+**Examples**
+
+```bash
+uv pip install requests
+uv pip install -r requirements.txt
+uv pip install your-package \
+  --index-url https://artifactory.../simple
+```
+
+**Best for**
+
+- Dockerfiles
+- CI pipelines
+- Legacy `requirements.txt`
+- One-off or transient installs
+
+**Think of it as**
+
+> A **much faster `pip` replacement**
+
+---
+
+## Key behavioral differences
+
+### Dependency tracking
+
+- `uv add` → **tracked & locked**
+- `uv pip install` → **installed only**
+
+### Lockfile usage
+
+- `uv add` → updates `uv.lock`
+- `uv pip install` → ignores lockfile
+
+### Reproducibility
+
+- `uv add` → ✅ reproducible
+- `uv pip install` → ❌ environment-dependent
+
+---
+
+## Docker best practice (important)
+
+In **Dockerfiles**, prefer:
+
+```dockerfile
+RUN uv pip install -r requirements.txt
+```
+
+NOT:
+
+```dockerfile
+RUN uv add requests   # ❌ modifies project metadata at build time
+```
+
+---
+
+## When to choose which
+
+**Use `uv add` if:**
+
+- You are developing a Python project
+- You want dependency versions recorded
+- You commit `pyproject.toml` and `uv.lock`
+
+**Use `uv pip install` if:**
+
+- You’re building containers
+- You’re in CI/CD
+- You rely on `requirements.txt`
+- You install from private indexes (Artifactory / PyPI mirrors)
+
+---
+
+## One-line rule of thumb
+
+> **`uv add` is for developers. `uv pip install` is for environments.**

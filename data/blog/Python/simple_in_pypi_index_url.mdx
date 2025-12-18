@@ -1,0 +1,93 @@
+---
+title: '/simple in PyPI index URL'
+tags: [Python]
+date: 2025-12-18
+---
+
+In a PyPI (or PyPI-compatible) index URL, **`/simple` refers to the “Simple API”** defined by **PEP 503**.
+
+### What the “simple” index is
+
+The **Simple Repository API** is a **minimal, machine-friendly HTML interface** that Python packaging tools (like `pip`, `uv`, `poetry`) use to discover and download packages.
+
+Example:
+
+```
+https://pypi.org/simple/
+```
+
+or in Artifactory:
+
+```
+https://<host>/artifactory/api/pypi/<repo>/simple/
+```
+
+### Why it’s called “simple”
+
+It’s intentionally:
+
+- **Static**
+- **HTML only** (no JSON, no UI)
+- **Easy to parse by tools**
+
+Each page is just a list of links.
+
+Example package page:
+
+```
+https://pypi.org/simple/requests/
+```
+
+HTML (simplified):
+
+```html
+<a href="requests-2.31.0-py3-none-any.whl">requests-2.31.0</a>
+<a href="requests-2.30.0.tar.gz">requests-2.30.0</a>
+```
+
+### What `/simple` is used for
+
+`pip` and similar tools **require** the Simple API for package resolution:
+
+```bash
+pip install requests \
+  --index-url https://pypi.org/simple
+```
+
+or in `requirements.txt`:
+
+```txt
+--index-url https://artifactory.example.com/artifactory/api/pypi/my-repo/simple
+```
+
+### What `/simple` is NOT
+
+- ❌ Not a web UI
+- ❌ Not browseable like `/ui/native/...`
+- ❌ Not a REST JSON API
+
+That’s why:
+
+- You **can** open `/ui/native/...` in a browser
+- You **cannot** meaningfully “browse” `/simple` except as raw HTML
+
+### Why your Artifactory URLs behave differently
+
+In Artifactory:
+
+| URL                                        | Purpose                       |
+| ------------------------------------------ | ----------------------------- |
+| `/ui/native/SPNKR-pypi/...`                | Human UI                      |
+| `/artifactory/api/pypi/SPNKR-pypi/simple/` | **pip-compatible Simple API** |
+
+If `pip` can’t access the `/simple` endpoint, it’s usually due to:
+
+- Missing authentication
+- Wrong repository type
+- Proxy vs local repo mismatch
+- Incorrect credentials in Docker build
+
+### Key takeaway
+
+> **`/simple` is the standardized, minimal package index that pip uses to find packages.**
+> If an index URL doesn’t end in `/simple`, `pip` will not treat it as a valid PyPI repository.

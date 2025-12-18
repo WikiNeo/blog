@@ -1,0 +1,67 @@
+---
+title: 'Shell Variable Expansion'
+tags: [Shell]
+date: 2025-12-18
+---
+
+In POSIX shells (bash, sh, zsh), **variable expansion happens before command execution**, so variables assigned **earlier on the same line** are _not_ available for expansion later on that line.
+
+### Why this fails
+
+```sh
+ARTIFACTORY_USER="alice" echo "${ARTIFACTORY_USER}"
+```
+
+What actually happens:
+
+1. Shell performs **parameter expansion** → `${ARTIFACTORY_USER}` (old value or empty)
+2. Shell executes the command with a **temporary environment assignment**
+
+So the expansion does **not** see the new value.
+
+### Correct ways to do it
+
+#### ✅ Use `&&` (what you suggested)
+
+```sh
+ARTIFACTORY_USER="alice" && echo "${ARTIFACTORY_USER}"
+```
+
+This works because:
+
+- The assignment runs first
+- The variable is set in the shell
+- The next command sees it
+
+#### ✅ Use separate lines (most readable)
+
+```sh
+ARTIFACTORY_USER="alice"
+echo "${ARTIFACTORY_USER}"
+```
+
+#### ✅ Use a subshell if you want scoping
+
+```sh
+(
+  ARTIFACTORY_USER="alice"
+  echo "${ARTIFACTORY_USER}"
+)
+```
+
+### Important distinction
+
+This _does_ work, but only for the executed command—not for expansion:
+
+```sh
+ARTIFACTORY_USER="alice" env | grep ARTIFACTORY_USER
+```
+
+Because `env` reads the environment **at execution time**, not expansion time.
+
+---
+
+### Rule of thumb
+
+> **Never rely on variable expansion from assignments made on the same command line.**
+> Use `&&`, newlines, or a subshell instead.
