@@ -1,247 +1,233 @@
 ---
 title: "How to solve a Dynamic Programming Problem ?"
 tags: [DynamicProgramming]
-date: 2021-10-11
-summary: problems in Polynomial Time.
+date: 2025-12-26
 ---
 
-Dynamic Programming (DP) is a technique that solves some particular type of
-problems in Polynomial Time. Dynamic Programming solutions are faster than the
-exponential brute method and can be easily proved for their correctness.
+Dynamic Programming (DP) is about **breaking a complex problem into smaller overlapping subproblems and reusing their results** instead of recomputing them.
 
-## Overlapping Sub-problems
+Below is a **clear, repeatable framework** you can apply to *almost any DP problem*, plus a Python example.
 
-Dynamic Programming is an algorithmic paradigm that solves a given complex
-problem by breaking it into sub-problems and stores the results of sub-problems to
-avoid computing the same results again.
+---
 
-Like Divide and Conquer, Dynamic Programming combines solutions to sub-problems.
-Dynamic Programming is mainly used when solutions of the same sub-problems are
-needed again and again. In Dynamic Programming, computed solutions to
-sub-problems are stored in a table so that these don't have to be recomputed. So
-Dynamic Programming is not useful when there are not common (overlapping)
-sub-problems because there is no point storing the solutions if they are not
-needed again.
+## 1️⃣ Recognize a DP Problem
+
+A problem is suitable for DP if it has **both**:
+
+### ✅ Overlapping Subproblems
+
+* Same subproblems appear multiple times
+* Example: Fibonacci, knapsack, shortest paths
+
+### ✅ Optimal Substructure
+
+* Optimal solution can be built from optimal solutions of subproblems
+* Example: shortest path to node `X` uses shortest paths to previous nodes
+
+> If brute force recursion repeats work → DP is likely the answer.
+
+---
+
+## 2️⃣ Define the State (The Most Important Step)
+
+Ask yourself:
+
+> **What is the minimum information needed to describe a subproblem?**
+
+Examples:
+
+* `dp[i]` → answer for first `i` elements
+* `dp[i][j]` → answer using first `i` items with capacity `j`
+* `dp[i][j]` → best answer for substring `s[i:j]`
+
+**Rule of thumb**:
+
+> One DP dimension = one decision axis
+
+---
+
+## 3️⃣ Write the Recurrence Relation
+
+Express how the state depends on **smaller states**.
+
+General form:
+
+```text
+dp[state] = best(
+    dp[smaller_state_1],
+    dp[smaller_state_2],
+    ...
+)
+```
+
+Examples:
+
+* Fibonacci:
+
+```text
+dp[n] = dp[n-1] + dp[n-2]
+```
+
+* Coin change:
+
+```text
+dp[x] = min(dp[x - coin] + 1)
+```
+
+---
+
+## 4️⃣ Identify Base Cases
+
+Base cases **stop the recursion** and anchor the DP.
+
+Examples:
+
+```text
+dp[0] = 0
+dp[1] = 1
+dp[empty_string] = true
+```
+
+If your base cases are wrong → the entire solution fails.
+
+---
+
+## 5️⃣ Choose DP Style
+
+### 🟦 Top-Down (Memoization)
+
+* Recursive + cache
+* Easier to write
+* Good for complex states
 
 ```python
-# a simple recursive program for Fibonacci numbers
-def fib(n):
-	if n <= 1:
-		return n
+from functools import lru_cache
 
-	return fib(n - 1) + fib(n - 2)
+@lru_cache(None)
+def dp(n):
+    if n <= 1:
+        return n
+    return dp(n - 1) + dp(n - 2)
 ```
 
-### Memoization (Top Down)
+### 🟩 Bottom-Up (Tabulation)
 
-The memoized program for a problem is similar to the recursive version with a
-small modification that looks into a lookup table before computing solutions.
+* Iterative
+* Faster, no recursion
+* Easier to optimize space
 
 ```python
-# a program for Memoized version of nth Fibonacci number
- 
-# function to calculate nth Fibonacci number
-def fib(n, lookup):
- 
-    # base case
-    if n <= 1 :
-        lookup[n] = n
- 
-    # if the value is not calculated previously then calculate it
-    if lookup[n] is None:
-        lookup[n] = fib(n-1 , lookup)  + fib(n-2 , lookup)
- 
-    # return the value corresponding to that value of n
-    return lookup[n]
-# end of function
- 
-# Driver program to test the above function
-def main():
-    n = 34
-    # Declaration of lookup table
-    # Handles till n = 100
-    lookup = [None] * 101
-    print "Fibonacci Number is ", fib(n, lookup)
- 
-if __name__=="__main__":
-    main()
+dp = [0, 1]
+for i in range(2, n + 1):
+    dp.append(dp[i - 1] + dp[i - 2])
 ```
 
-### Tabulation (Bottom Up) 
+---
 
-The tabulated program for a given problem builds a table in bottom-up fashion
-and returns the last entry from the table.
+## 6️⃣ Decide the Iteration Order
+
+You **must compute smaller states first**.
+
+Examples:
+
+* 1D DP → left to right
+* 2D DP on strings → increasing length
+* Knapsack → careful about loop direction
+
+> Wrong iteration order = wrong answer ❌
+
+---
+
+## 7️⃣ Optimize Space (If Needed)
+
+Many DP problems only need **previous states**.
+
+Example: Fibonacci
 
 ```python
-# Python program Tabulated (bottom up) version
-def fib(n):
-
-	# array declaration
-	f = [0] * (n + 1)
-
-	# base case assignment
-	f[1] = 1
-
-	# calculating the fibonacci and storing the values
-	for i in xrange(2 , n + 1):
-		f[i] = f[i - 1] + f[i - 2]
-	return f[n]
-
-# Driver program to test the above function
-def main():
-	n = 9
-	print "Fibonacci number is " , fib(n)
-
-if __name__=="__main__":
-	main()
-
-# This code is contributed by Nikhil Kumar Singh (nickzuck_007)
+a, b = 0, 1
+for _ in range(n):
+    a, b = b, a + b
 ```
 
-## Optimal Substructure Property
+Space drops from `O(n)` → `O(1)`.
 
-A given problem has Optimal Substructure Property if optimal solution of the
-given problem can be obtained by using optimal solutions of its sub-problems.
+---
 
-## How to Solve a Dynamic Programming Problem
+## 8️⃣ Worked Example: Climbing Stairs
 
-```Steps to solve a DP
-1) Identify if it is a DP problem
-2) Decide a state expression with least parameters
-3) Formulate state relationship
-4) Do tabulation (or add memoization)
+### Problem
+
+You can climb `n` stairs, taking 1 or 2 steps at a time.
+How many distinct ways?
+
+### Step-by-step
+
+#### State
+
+```text
+dp[i] = number of ways to reach step i
 ```
 
-### Step 1: How to classify a problem as a Dynamic Programming Problem?
+#### Recurrence
 
-- Typically, all the problems that requires maximizing or minimizing certain
-  quantities or counting problems that say to count the arrangements under
-  certain conditions or certain probability problems can be solved by using
-  Dynamic Programming.
-- All dynamic programming problems satisfy the overlapping sub-problems property
-  and most of the classic dynamic problems also satisfy the optimal substructure
-  property.
-
-### Step 2: Deciding the state
-
-DP problems are all about state and their transition. This is the most basic
-step which must be done very carefully because the state transition depends on
-the choice of state definition you make.
-
-A state can be defined as the set of parameters that can uniquely identify a
-certain position or standing in the given problem. This set of parameters should
-be as small as possible to reduce state space.
-
-### Step 3: Formulating a relation among the states
-
-```shell
-Given 3 numbers {1, 3, 5}, we need to tell
-the total number of ways we can form a number 'N' 
-using the sum of the given three numbers.
-(allowing repetitions and different arrangements).
-
-Total number of ways to form 6 is: 8
-1+1+1+1+1+1
-1+1+1+3
-1+1+3+1
-1+3+1+1
-3+1+1+1
-3+3
-1+5
-5+1
+```text
+dp[i] = dp[i-1] + dp[i-2]
 ```
 
-Let’s think dynamically about this problem. So, first of all, we decide a state
-for the given problem. We will take a parameter n to decide state as it can
-uniquely identify any subproblem. So, our state dp will look like state(n).
-Here, state(n) means the total number of arrangements to form n by using {1, 3,
-5} as elements.
+#### Base cases
 
-#### 1) Adding 1 to all possible combinations of state (n = 6) 
-
-```shell
-Eg : [ (1+1+1+1+1+1) + 1] 
-[ (1+1+1+3) + 1] 
-[ (1+1+3+1) + 1] 
-[ (1+3+1+1) + 1] 
-[ (3+1+1+1) + 1] 
-[ (3+3) + 1] 
-[ (1+5) + 1] 
-[ (5+1) + 1] 
+```text
+dp[0] = 1
+dp[1] = 1
 ```
 
-#### 2) Adding 3 to all possible combinations of state (n = 4);
+#### Python solution
 
-```shell
-Eg : [(1+1+1+1) + 3] 
-[(1+3) + 3] 
-[(3+1) + 3] 
+```python
+def climb_stairs(n: int) -> int:
+    if n <= 1:
+        return 1
+
+    dp = [0] * (n + 1)
+    dp[0] = dp[1] = 1
+
+    for i in range(2, n + 1):
+        dp[i] = dp[i - 1] + dp[i - 2]
+
+    return dp[n]
 ```
 
-#### 3) Adding 5 to all possible combinations of state(n = 2) 
+---
 
-```shell
-Eg : [ (1+1) + 5]
-```
+## 9️⃣ Common DP Patterns (Learn These!)
 
-In general
+![Image](https://media.geeksforgeeks.org/wp-content/uploads/gfg-2.jpg)
 
-```shell
-state(n) = state(n-1) + state(n-3) + state(n-5)
-```
+![Image](https://www.tutorialspoint.com/data_structures_algorithms/images/table2.jpg)
 
-```python3
-# Returns the number of arrangements to
-# form 'n'
-def solve(n):
+![Image](https://www2.seas.gwu.edu/~simhaweb/alg/modules/module9/figures/dyn1.png)
 
-# Base case
-if n < 0:
-	return 0
-if n == 0:
-	return 1
+![Image](https://storage.googleapis.com/algodailyrandomassets/curriculum/dynamic-programming/dp6.png)
 
-return (solve(n - 1) +
-		solve(n - 3) +
-		solve(n - 5))
+![Image](https://favtutor.com/resources/images/uploads/mceu_76557621681668491140265.png)
 
-```
+| Pattern         | Examples                    |
+| --------------- | --------------------------- |
+| **1D DP**       | Fibonacci, Climbing Stairs  |
+| **Knapsack**    | 0/1 Knapsack, Coin Change   |
+| **String DP**   | LCS, Edit Distance          |
+| **Grid DP**     | Unique Paths, Min Path Sum  |
+| **Interval DP** | Matrix Chain Multiplication |
+| **Bitmask DP**  | TSP, subsets                |
 
-### Step 4: Adding memoization or tabulation for the state
+---
 
-```python3
-# This function returns the number of
-# arrangements to form 'n'
+## 10️⃣ Mental Checklist (Use This Every Time)
 
-# lookup dictionary/hashmap is initialized
-def solve(n, lookup = {}):
-	
-	# Base cases
-	# negative number can't be
-	# produced, return 0
-	if n < 0:
-		return 0
+✔ What is my **state**?
+✔ What is the **transition**?
+✔ What are the **base cases**?
+✔ What is the **order of computation**?
+✔ Can I **optimize space**?
 
-	# 0 can be produced by not
-	# taking any number whereas
-	# 1 can be produced by just taking 1
-	if n == 0:
-		return 1
-
-	# Checking if number of way for
-	# producing n is already calculated
-	# or not if calculated, return that,
-	# otherwise calulcate and then return
-	if n not in lookup:
-		lookup[n] = (solve(n - 1) +
-					solve(n - 3) +
-					solve(n - 5))
-					
-	return lookup[n]
-```
-
-## Reference
-
-- [https://www.geeksforgeeks.org/solve-dynamic-programming-problem/](https://www.geeksforgeeks.org/solve-dynamic-programming-problem/)
-- [https://www.geeksforgeeks.org/overlapping-subproblems-property-in-dynamic-programming-dp-1/](https://www.geeksforgeeks.org/overlapping-subproblems-property-in-dynamic-programming-dp-1/)
-- [https://www.geeksforgeeks.org/optimal-substructure-property-in-dynamic-programming-dp-2/](https://www.geeksforgeeks.org/optimal-substructure-property-in-dynamic-programming-dp-2/)
