@@ -1,125 +1,182 @@
 ---
-title: "[Structural] Decorator"
+title: "[Structural] Decorator Design Pattern"
 tags: [DesignPattern]
-date: 2022-05-05
-summary: Imagine you run a car service shop offering multiple services.
+date: 2025-12-30
 ---
 
-## Real world example
+## 🎨 Decorator Design Pattern
 
-Imagine you run a car service shop offering multiple services. Now how do you
-calculate the bill to be charged? You pick one service and dynamically keep
-adding to it the prices for the provided services till you get the final cost.
-Here each type of service is a decorator.
+The **Decorator Pattern** is a **structural design pattern** that lets you **add new behavior to objects dynamically**—*without modifying their original class*.
+It does this by **wrapping** objects in decorator classes that implement the same interface.
 
-## In plain words
+---
 
-Decorator pattern lets you dynamically change the behavior of an object at run
-time by wrapping them in an object of a decorator class.
+## 🧠 Core Idea (Intuition)
 
-## Wikipedia says
+Instead of creating many subclasses like:
 
-In object-oriented programming, the decorator pattern is a design pattern that
-allows behavior to be added to an individual object, either statically or
-dynamically, without affecting the behavior of other objects from the same
-class. The decorator pattern is often useful for adhering to the Single
-Responsibility Principle, as it allows functionality to be divided between
-classes with unique areas of concern.
-
-## Programmatic Example
-
-Lets take coffee for example. First of all we have a simple coffee
-implementing the coffee interface
-
-```typescript
-interface Coffee {
-    getCost() : number;
-    getDescription(): string;
-}
-
-class SimpleCoffee implements Coffee {
-    getCost() {
-        return 10;
-    }
-
-    getDescription() {
-        return 'Simple coffee'
-    }
-}
+```
+Coffee
+ ├─ CoffeeWithMilk
+ ├─ CoffeeWithSugar
+ ├─ CoffeeWithMilkAndSugar
+ ├─ CoffeeWithMilkSugarCaramel
 ```
 
-We want to make the code extensible to allow options to modify it if required.
-Lets make some add-ons (decorators)
+You **compose behavior at runtime**:
 
-```typescript
-class MilkCoffee implements Coffee {
-    protected coffee: Coffee;
-
-    constructor(coffee: Coffee) {
-        this.coffee = coffee;
-    }
-
-    getCost(): number {
-        return this.coffee.getCost() + 2;
-    }
-
-    getDescription(): string {
-        return this.coffee.getDescription() + ', milk'
-    }
-}
-
-class WhipCoffee implements Coffee {
-    protected coffee: Coffee;
-
-    constructor(coffee: Coffee) {
-        this.coffee = coffee;
-    }
-
-    getCost(): number {
-        return this.coffee.getCost() + 5;
-    }
-
-    getDescription(): string {
-        return this.coffee.getDescription() + ', whip'
-    }
-}
-
-class VanillaCoffee implements Coffee {
-    protected coffee: Coffee;
-
-    constructor(coffee: Coffee) {
-        this.coffee = coffee;
-    }
-
-    getCost(): number {
-        return this.coffee.getCost() + 3;
-    }
-
-    getDescription(): string {
-        return this.coffee.getDescription() + ', vanilla'
-    }
-}
+```
+Coffee → MilkDecorator → SugarDecorator → CaramelDecorator
 ```
 
-Lets make a coffee now
+This keeps classes small, flexible, and open for extension.
 
-```typescript
-let coffee = new SimpleCoffee()
-coffee.getCost()
-coffee.getDescription()
+---
 
-coffee = new MilkCoffee(coffee)
-coffee.getCost()
-coffee.getDescription()
+## 🧩 Structure
 
-coffee = new WhipCoffee(coffee)
-coffee.getCost()
-coffee.getDescription()
+The pattern has **four key roles**:
+
+1. **Component**
+
+   * Common interface for objects and decorators
+2. **ConcreteComponent**
+
+   * The original object
+3. **Decorator (abstract)**
+
+   * Wraps a Component
+4. **ConcreteDecorator**
+
+   * Adds new behavior
+
+---
+
+## ✅ When to Use Decorator
+
+Use it when:
+
+* You want to **add responsibilities dynamically**
+* Subclassing would cause a **class explosion**
+* You want to follow **Open–Closed Principle**
+* Behavior combinations should be **flexible at runtime**
+
+Avoid it when:
+
+* You need strict object identity
+* Debugging layered behavior would be too complex
+
+---
+
+## 🐍 Python Example (Clean & Idiomatic)
+
+### 1️⃣ Component Interface
+
+```python
+from abc import ABC, abstractmethod
+
+class Coffee(ABC):
+    @abstractmethod
+    def cost(self) -> float:
+        pass
+
+    @abstractmethod
+    def description(self) -> str:
+        pass
 ```
 
+---
 
-## References
+### 2️⃣ Concrete Component
 
-- [https://github.com/kamranahmedse/design-patterns-for-humans](https://github.com/kamranahmedse/design-patterns-for-humans)
-- [https://github.com/torokmark/design_patterns_in_typescript](https://github.com/torokmark/design_patterns_in_typescript)
-- [https://refactoring.guru/design-patterns](https://refactoring.guru/design-patterns)
+```python
+class SimpleCoffee(Coffee):
+    def cost(self) -> float:
+        return 2.0
+
+    def description(self) -> str:
+        return "Simple coffee"
+```
+
+---
+
+### 3️⃣ Base Decorator
+
+```python
+class CoffeeDecorator(Coffee):
+    def __init__(self, coffee: Coffee):
+        self._coffee = coffee
+
+    def cost(self) -> float:
+        return self._coffee.cost()
+
+    def description(self) -> str:
+        return self._coffee.description()
+```
+
+---
+
+### 4️⃣ Concrete Decorators
+
+```python
+class MilkDecorator(CoffeeDecorator):
+    def cost(self) -> float:
+        return self._coffee.cost() + 0.5
+
+    def description(self) -> str:
+        return self._coffee.description() + ", milk"
+
+
+class SugarDecorator(CoffeeDecorator):
+    def cost(self) -> float:
+        return self._coffee.cost() + 0.2
+
+    def description(self) -> str:
+        return self._coffee.description() + ", sugar"
+```
+
+---
+
+### 5️⃣ Usage
+
+```python
+coffee = SimpleCoffee()
+coffee = MilkDecorator(coffee)
+coffee = SugarDecorator(coffee)
+
+print(coffee.description())  # Simple coffee, milk, sugar
+print(coffee.cost())         # 2.7
+```
+
+🎯 **Decorators stack cleanly** and can be reordered or skipped.
+
+---
+
+## 🔍 Decorator vs Inheritance
+
+| Aspect                | Decorator | Inheritance      |
+| --------------------- | --------- | ---------------- |
+| Runtime flexibility   | ✅ High    | ❌ Low            |
+| Class explosion       | ❌ Avoided | ✅ Common         |
+| Open–Closed Principle | ✅ Yes     | ❌ Often violated |
+| Object identity       | ❌ Wrapped | ✅ Preserved      |
+
+---
+
+## ⚙️ Real-World Examples
+
+* Java I/O Streams (`BufferedInputStream`)
+* GUI toolkits (scrollbars, borders)
+* Middleware pipelines
+* Python function decorators (`@lru_cache`, `@retry`)
+* Game buffs / debuffs (very common in RPG engines)
+
+---
+
+## 🧠 Mental Model
+
+> **Inheritance adds behavior vertically.
+> Decorator adds behavior horizontally.**
+
+---
+
