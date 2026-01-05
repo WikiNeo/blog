@@ -1,22 +1,190 @@
 ---
 title: "Nginx add_header"
 tags: [Nginx]
-date: 2024-03-11
-summary: Adds the specified field to a response header provided that the response code equals 200, 201 (1.
+date: 2026-01-05
 ---
 
 ```
-Syntax:		add_header name value [always];
-Default:	—
-Context:	http, server, location, if in location
+In **Nginx**, `add_header` is used to **add HTTP response headers** (for security, caching, CORS, debugging, etc.).
+
+Below is a **clear, practical guide** with common pitfalls and best practices.
+
+---
+
+## Basic syntax
+
+```nginx
+add_header <header-name> <value> [always];
 ```
 
-Adds the specified field to a response header provided that the response code equals 200, 201 (1.3.10), 204, 206, 301, 302, 303, 304, 307 (1.1.16, 1.0.13), or 308 (1.13.0). Parameter value can contain variables.
+Example:
 
-There could be several add_header directives. These directives are inherited from the previous configuration level if and only if there are no add_header directives defined on the current level.
+```nginx
+add_header X-Custom-Header "Hello World";
+```
 
-If the always parameter is specified (1.7.5), the header field will be added regardless of the response code.
+This adds to the **response headers** sent to the client.
 
-## Reference
+---
 
-- [https://nginx.org/en/docs/http/ngx_http_headers_module.html#add_header](https://nginx.org/en/docs/http/ngx_http_headers_module.html#add_header)
+## ⚠️ Important rule (most people get this wrong)
+
+> **`add_header` only applies to successful responses (2xx, 3xx) by default**
+
+That means **404 / 500 / 401 responses will NOT include the header** unless you use `always`.
+
+### Correct way (recommended)
+
+```nginx
+add_header X-Frame-Options "DENY" always;
+```
+
+---
+
+## Scope & inheritance (VERY important)
+
+`add_header` **does NOT inherit** the way you might expect.
+
+### Rule
+
+* If **any `add_header` exists at a lower level**, **all parent `add_header`s are ignored**
+
+Hierarchy:
+
+```
+http
+ └── server
+      └── location
+```
+
+### ❌ Common mistake
+
+```nginx
+server {
+    add_header X-A "A";
+
+    location / {
+        add_header X-B "B";
+    }
+}
+```
+
+**Result** in `/`:
+
+* ❌ `X-A` is **missing**
+* ✅ Only `X-B` exists
+
+### ✅ Correct way
+
+```nginx
+server {
+    add_header X-A "A";
+
+    location / {
+        add_header X-A "A";
+        add_header X-B "B";
+    }
+}
+```
+
+---
+
+## Common real-world examples
+
+### 1. Security headers
+
+```nginx
+add_header X-Frame-Options "DENY" always;
+add_header X-Content-Type-Options "nosniff" always;
+add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+add_header Content-Security-Policy "default-src 'self'" always;
+```
+
+---
+
+### 2. CORS headers
+
+```nginx
+add_header Access-Control-Allow-Origin "*" always;
+add_header Access-Control-Allow-Methods "GET, POST, OPTIONS" always;
+add_header Access-Control-Allow-Headers "Authorization, Content-Type" always;
+```
+
+For **OPTIONS preflight**:
+
+```nginx
+if ($request_method = OPTIONS) {
+    add_header Content-Length 0;
+    add_header Content-Type text/plain;
+    return 204;
+}
+```
+
+---
+
+### 3. Disable caching
+
+```nginx
+add_header Cache-Control "no-store, no-cache, must-revalidate, proxy-revalidate" always;
+add_header Pragma "no-cache" always;
+add_header Expires "0" always;
+```
+
+---
+
+### 4. Debug / inspection header
+
+```nginx
+add_header X-Served-By $hostname always;
+```
+
+---
+
+## Overriding or removing headers
+
+### Replace a header
+
+Just redefine it:
+
+```nginx
+add_header Cache-Control "max-age=3600" always;
+```
+
+### Remove headers (needs `headers_more` module)
+
+```nginx
+more_clear_headers Server;
+more_clear_headers X-Powered-By;
+```
+
+---
+
+## `proxy_set_header` ≠ `add_header`
+
+This is a **very common confusion**:
+
+| Directive          | Purpose                                     |
+| ------------------ | ------------------------------------------- |
+| `add_header`       | Adds headers to **response sent to client** |
+| `proxy_set_header` | Sets headers **sent to upstream server**    |
+
+Example:
+
+```nginx
+proxy_set_header X-Forwarded-For $remote_addr;
+```
+
+⬆️ This does **not** affect client response headers.
+
+---
+
+## Quick checklist (best practice)
+
+✅ Always use `always`
+✅ Repeat headers at each level where you use `add_header`
+✅ Put global headers at `server` or `http` level
+❌ Don’t assume inheritance
+❌ Don’t confuse with `proxy_set_header`
+
+---
+
