@@ -1,0 +1,211 @@
+---
+title: "SOLID with Python examples"
+tags: [DesignPattern]
+date: 2025-12-24
+---
+
+
+**SOLID Principles** are five core **object-oriented design principles** that help you write **cleaner, more maintainable, extensible, and testable code**. They were popularized by Robert C. Martin (“Uncle Bob”) and are especially relevant in languages like **Python, Java, C++, C#**, etc.
+
+Below is a clear, practical explanation with **Python examples**.
+
+---
+
+## 🧱 What does SOLID stand for?
+
+| Letter | Principle             | Core Idea                                       |
+| ------ | --------------------- | ----------------------------------------------- |
+| **S**  | Single Responsibility | One class = one reason to change                |
+| **O**  | Open / Closed         | Open for extension, closed for modification     |
+| **L**  | Liskov Substitution   | Subtypes must be usable as their base types     |
+| **I**  | Interface Segregation | Don’t force clients to depend on unused methods |
+| **D**  | Dependency Inversion  | Depend on abstractions, not concretions         |
+
+---
+
+## 1️⃣ Single Responsibility Principle (SRP)
+
+> **A class should have only one reason to change.**
+
+### ❌ Bad
+
+```python
+class User:
+    def save_to_db(self):
+        pass
+
+    def send_email(self):
+        pass
+```
+
+Why bad?
+
+* Database logic and email logic are **two responsibilities**
+
+### ✅ Good
+
+```python
+class User:
+    pass
+
+class UserRepository:
+    def save(self, user):
+        pass
+
+class EmailService:
+    def send(self, user):
+        pass
+```
+
+✔ Easier to test
+✔ Easier to modify
+✔ Fewer side effects
+
+---
+
+## 2️⃣ Open / Closed Principle (OCP)
+
+> **Software entities should be open for extension, but closed for modification.**
+
+### ❌ Bad (needs modification every time)
+
+```python
+def calculate_salary(employee):
+    if employee.type == "full_time":
+        return employee.salary
+    if employee.type == "contract":
+        return employee.hours * employee.rate
+```
+
+### ✅ Good (use polymorphism)
+
+```python
+class Employee:
+    def calculate_salary(self):
+        raise NotImplementedError
+
+class FullTime(Employee):
+    def calculate_salary(self):
+        return self.salary
+
+class Contract(Employee):
+    def calculate_salary(self):
+        return self.hours * self.rate
+```
+
+✔ Add new employee types **without touching existing code**
+
+---
+
+## 3️⃣ Liskov Substitution Principle (LSP)
+
+> **Objects of a superclass should be replaceable with objects of its subclasses without breaking the program.**
+
+### ❌ Classic violation
+
+```python
+class Bird:
+    def fly(self):
+        pass
+
+class Penguin(Bird):
+    def fly(self):
+        raise Exception("I can't fly")
+```
+
+Penguin **is a Bird**, but cannot behave like one.
+
+### ✅ Better design
+
+```python
+class Bird:
+    pass
+
+class FlyingBird(Bird):
+    def fly(self):
+        pass
+
+class Penguin(Bird):
+    pass
+```
+
+✔ Subclasses never break expectations
+
+---
+
+## 4️⃣ Interface Segregation Principle (ISP)
+
+> **Clients should not be forced to depend on methods they do not use.**
+
+### ❌ Fat interface
+
+```python
+class Machine:
+    def print(self): pass
+    def scan(self): pass
+    def fax(self): pass
+```
+
+A printer that can’t scan still must implement `scan()`.
+
+### ✅ Split interfaces
+
+```python
+class Printer:
+    def print(self): pass
+
+class Scanner:
+    def scan(self): pass
+```
+
+✔ Smaller, cleaner interfaces
+✔ Fewer dummy methods
+
+---
+
+## 5️⃣ Dependency Inversion Principle (DIP)
+
+> **High-level modules should not depend on low-level modules. Both should depend on abstractions.**
+
+### ❌ Tight coupling
+
+```python
+class MySQLDatabase:
+    def connect(self): pass
+
+class App:
+    def __init__(self):
+        self.db = MySQLDatabase()
+```
+
+### ✅ Depend on abstraction
+
+```python
+class Database:
+    def connect(self):
+        raise NotImplementedError
+
+class MySQLDatabase(Database):
+    def connect(self):
+        pass
+
+class App:
+    def __init__(self, db: Database):
+        self.db = db
+```
+
+✔ Easier to test (mock databases)
+✔ Easy to swap implementations
+
+---
+
+## ⚠️ Important note
+
+SOLID is **not about over-engineering**.
+
+* Small scripts ❌ don’t need full SOLID
+* Libraries, services, tools ✅ benefit a lot
+
+Think of SOLID as **design gravity**, not rigid law.
+
+---
