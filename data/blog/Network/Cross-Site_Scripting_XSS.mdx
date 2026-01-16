@@ -1,46 +1,173 @@
 ---
 title: 'Cross-Site Scripting (XSS)'
 tags: [Network]
-date: 2022-11-23
+date: 2026-01-16
 ---
 
-**XSS (Cross-Site Scripting)** is a type of security vulnerability found in web applications. It allows attackers to inject malicious scripts (usually JavaScript) into content that is then viewed by other users.
+**Cross-Site Scripting (XSS)** is a web security vulnerability that allows an attacker to inject **malicious JavaScript** into web pages viewed by other users. When those users load the page, the attacker’s script runs **in the victim’s browser**, as if it were trusted code from the website.
 
-### There are three main types of XSS
+---
 
-1. **Stored XSS**: The malicious script is permanently stored on the target server (e.g., in a comment field or user profile). When another user views the page, the script runs in their browser.
-2. **Reflected XSS**: The script is part of the request (like a URL parameter) and is immediately reflected back in the server response. It only runs when a user clicks a specially crafted link.
-3. **DOM-based XSS**: The vulnerability exists in the client-side code (JavaScript). It manipulates the DOM in an unsafe way using user input.
+## Why XSS is dangerous
 
-### Example
+Because the script runs in the browser **under the site’s origin**, it can:
+
+- Steal cookies or session tokens (account hijacking)
+- Read or modify page content
+- Perform actions on behalf of the user (e.g. posting, deleting data)
+- Redirect users to malicious sites
+- Log keystrokes or sensitive inputs
+
+---
+
+## How XSS happens (core idea)
+
+XSS usually occurs when:
+
+1. A web application **accepts user input**
+2. The input is **included in HTML output**
+3. The input is **not properly escaped or sanitized**
+
+![Image](https://www.cloudflare.com/img/learning/security/threats/cross-site-scripting/xss-attack.png)
+
+![Image](https://cdn.acunetix.com/wp-content/uploads/2018/10/11110458/Diagram-Describing-Blind-XSS-Attack.gif)
+
+![Image](https://www.inspectiv.com/hs-fs/hubfs/Inspectiv_December2022/images/61cccea250b8fe03e2c3aec2_Screen-Shot-2021-05-19-at-7.52.57-AM.png?height=374&name=61cccea250b8fe03e2c3aec2_Screen-Shot-2021-05-19-at-7.52.57-AM.png&width=547)
+
+---
+
+## Types of XSS
+
+### 1. **Stored XSS (Persistent)**
+
+Malicious script is **stored on the server** (e.g. database, comments).
+
+**Example**:
+Attacker posts a comment:
 
 ```html
-<!-- Vulnerable code -->
-<p>Hello, <span id="name"></span>!</p>
 <script>
-  const params = new URLSearchParams(location.search)
-  document.getElementById('name').innerHTML = params.get('user')
+  alert('XSS')
 </script>
 ```
 
-If a user visits:
+Every user who views the comment executes the script.
+
+**Most dangerous**, because it affects many users automatically.
+
+---
+
+### 2. **Reflected XSS**
+
+Malicious input is **reflected immediately** in the response.
+
+**Example URL**:
 
 ```
-example.com/?user=<script>alert('XSS')</script>
+https://example.com/search?q=<script>alert(1)</script>
 ```
 
-The script runs in their browser — a basic example of DOM-based XSS.
+If the server outputs `q` directly into HTML, the script runs.
 
-### Risks
+Requires tricking a victim into clicking a crafted link.
 
-- Stealing session cookies
-- Defacing websites
-- Redirecting users
-- Delivering malware
+---
 
-### Prevention
+### 3. **DOM-Based XSS**
 
-- Escape or sanitize user input
-- Use HTTP-only cookies
-- Use Content Security Policy (CSP)
-- Prefer safe APIs like `textContent` over `innerHTML`
+The vulnerability exists **entirely in client-side JavaScript**.
+
+**Example**:
+
+```javascript
+document.getElementById('output').innerHTML = location.hash.substring(1)
+```
+
+If the URL hash contains `<script>...</script>`, it executes without server involvement.
+
+---
+
+## Simple vulnerable example (Python + Flask)
+
+### ❌ Vulnerable code
+
+```python
+from flask import Flask, request
+
+app = Flask(__name__)
+
+@app.route("/hello")
+def hello():
+    name = request.args.get("name", "")
+    return f"<h1>Hello {name}</h1>"
+```
+
+Visiting:
+
+```
+/hello?name=<script>alert('XSS')</script>
+```
+
+executes JavaScript in the browser.
+
+---
+
+## How to prevent XSS
+
+### 1. **Escape output (MOST IMPORTANT)**
+
+Never trust user input when rendering HTML.
+
+✅ Safe version (Flask auto-escaping with templates):
+
+```python
+from flask import Flask, request, render_template_string
+
+app = Flask(__name__)
+
+@app.route("/hello")
+def hello():
+    name = request.args.get("name", "")
+    return render_template_string("<h1>Hello {{ name }}</h1>", name=name)
+```
+
+---
+
+### 2. **Use proper encoding**
+
+- HTML context → HTML escape
+- JavaScript context → JS escape
+- URL context → URL encode
+
+---
+
+### 3. **Avoid dangerous APIs**
+
+Avoid:
+
+- `innerHTML`
+- `document.write`
+- `eval()`
+
+Prefer:
+
+- `textContent`
+- `setAttribute`
+
+---
+
+### 4. **Content Security Policy (CSP)**
+
+Limit what scripts can run:
+
+```http
+Content-Security-Policy: default-src 'self'
+```
+
+CSP **reduces impact** even if XSS exists.
+
+---
+
+## One-sentence summary
+
+> **XSS is a vulnerability where untrusted input is treated as executable JavaScript in a victim’s browser, allowing attackers to run code under a trusted website’s identity.**
