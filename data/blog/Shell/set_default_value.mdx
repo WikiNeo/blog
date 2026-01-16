@@ -1,0 +1,140 @@
+---
+title: 'How to set default value for a variable in Shell'
+tags: [Shell]
+date: 2026-01-16
+---
+
+This line is a **Bash parameter-expansion idiom** used to **set a default value** for a variable while being safe under strict shell modes.
+
+```sh
+: "${WORKSPACE:=/workspace}"
+```
+
+Let’s break it down piece by piece.
+
+---
+
+## 1. `:` — the null (no-op) command
+
+- `:` is a **built-in command** that does **nothing** and always succeeds (exit status `0`).
+- It is often used to _force evaluation_ of parameter expansions without running a real command.
+
+So here, `:` is just a wrapper to make sure the expansion happens.
+
+---
+
+## 2. `"${WORKSPACE:=/workspace}"` — default assignment
+
+This is **parameter expansion with default assignment**.
+
+### Meaning
+
+- If `WORKSPACE` **is unset or empty**, assign it the value:
+
+  ```sh
+  /workspace
+  ```
+
+- If `WORKSPACE` **already has a value**, leave it unchanged.
+
+### Equivalent logic in plain English
+
+> “If `WORKSPACE` is not set, set it to `/workspace`.”
+
+---
+
+## 3. Why the quotes matter
+
+```sh
+"${WORKSPACE:=/workspace}"
+```
+
+- Protects against word splitting and glob expansion
+- Safe even if the value contains spaces
+
+This is **best practice**.
+
+---
+
+## 4. Why not just write `WORKSPACE=/workspace`?
+
+Because that would **always overwrite** the variable.
+
+This line is **conditional**.
+
+---
+
+## 5. Why is `:` needed at all?
+
+Because `${VAR:=value}` **returns the value**, but on its own it’s not a valid shell command.
+
+This would be invalid:
+
+```sh
+"${WORKSPACE:=/workspace}"   # ❌ not a command
+```
+
+So we use `:` to consume the result safely.
+
+---
+
+## 6. Why this is common in `set -u` scripts
+
+With `set -u` (treat unset variables as errors):
+
+```sh
+echo "$WORKSPACE"   # ❌ error if unset
+```
+
+But:
+
+```sh
+: "${WORKSPACE:=/workspace}"
+echo "$WORKSPACE"   # ✅ always safe
+```
+
+This makes the pattern **strict-mode friendly**.
+
+---
+
+## 7. Equivalent forms
+
+### Using `if`
+
+```sh
+if [ -z "${WORKSPACE:-}" ]; then
+  WORKSPACE=/workspace
+fi
+```
+
+### Using `export`
+
+```sh
+: "${WORKSPACE:=/workspace}"
+export WORKSPACE
+```
+
+---
+
+## 8. Common real-world usage
+
+You’ll often see this in:
+
+- Docker entrypoint scripts
+- CI/CD scripts
+- Kubernetes init scripts
+- Strict Bash scripts (`set -euo pipefail`)
+
+Example:
+
+```sh
+: "${HOME:=/root}"
+: "${PORT:=8080}"
+: "${LOG_LEVEL:=info}"
+```
+
+---
+
+## One-line summary
+
+> **This line ensures `WORKSPACE` is set to `/workspace` if it wasn’t already, without overwriting an existing value, and works safely under `set -u`.**

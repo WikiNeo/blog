@@ -1,0 +1,153 @@
+---
+title: 'What is SQL Injection?'
+tags: [MySQL]
+date: 2026-01-16
+---
+
+**SQL Injection (SQLi)** is a **web security vulnerability** where an attacker injects **malicious SQL code** into an application’s database query, usually through **user input**.
+If the application does not properly validate or escape that input, the database may execute the attacker’s SQL instead of the intended query.
+
+---
+
+## Why SQL Injection Is Dangerous
+
+A successful SQL injection can allow an attacker to:
+
+- 🔓 **Bypass authentication** (log in without a password)
+- 📄 **Read sensitive data** (user accounts, passwords, credit cards)
+- ✏️ **Modify or delete data**
+- 🧨 **Drop entire tables**
+- 🖥️ **Gain full control of the database server** (in extreme cases)
+
+---
+
+## How SQL Injection Happens (Core Idea)
+
+The root cause is **mixing SQL code with untrusted user input**.
+
+### ❌ Vulnerable Example (Python + SQL)
+
+```python
+username = input("Username: ")
+password = input("Password: ")
+
+query = f"""
+SELECT * FROM users
+WHERE username = '{username}' AND password = '{password}'
+"""
+cursor.execute(query)
+```
+
+If an attacker enters:
+
+```text
+username: admin
+password: ' OR '1'='1
+```
+
+The query becomes:
+
+```sql
+SELECT * FROM users
+WHERE username = 'admin' AND password = '' OR '1'='1'
+```
+
+Since `'1'='1'` is always true, the login succeeds.
+
+---
+
+## Common SQL Injection Types
+
+### 1. **Classic (In-band) SQL Injection**
+
+The attacker directly sees results or error messages.
+
+```sql
+' OR 1=1 --
+```
+
+---
+
+### 2. **Blind SQL Injection**
+
+No error messages or data returned, but attacker infers info via behavior.
+
+```sql
+' AND SUBSTRING(password,1,1)='a'
+```
+
+---
+
+### 3. **Time-Based SQL Injection**
+
+Uses delays to infer information.
+
+```sql
+' OR IF(1=1, SLEEP(5), 0) --
+```
+
+If the page loads slowly → condition is true.
+
+---
+
+## How to Prevent SQL Injection (MOST IMPORTANT PART)
+
+### ✅ 1. Use **Parameterized Queries / Prepared Statements**
+
+**Correct Python example (safe):**
+
+```python
+query = "SELECT * FROM users WHERE username = %s AND password = %s"
+cursor.execute(query, (username, password))
+```
+
+Here:
+
+- SQL code and data are **separated**
+- User input is **never executed as SQL**
+
+---
+
+### ✅ 2. Never Build SQL with String Concatenation
+
+❌ Bad:
+
+```python
+"... WHERE id = " + user_input
+```
+
+✅ Good:
+
+```python
+"... WHERE id = %s"
+```
+
+---
+
+### ✅ 3. Use an ORM (Recommended)
+
+Frameworks like:
+
+- SQLAlchemy
+- Django ORM
+- Hibernate
+
+automatically protect against SQL injection **when used correctly**.
+
+---
+
+### ✅ 4. Least-Privilege Database Accounts
+
+- Web app should **not** use a DB user with `DROP`, `ALTER`, or `SUPER` privileges.
+
+---
+
+### ✅ 5. Input Validation (Defense-in-Depth)
+
+- Enforce expected formats (numbers, length limits, whitelists)
+
+---
+
+## Key Takeaway (One Sentence)
+
+> **SQL injection happens when user input is treated as SQL code instead of data.**

@@ -2,7 +2,6 @@
 title: "What's the difference between SSL and TLS?"
 tags: [Network]
 date: 2023-09-19
-summary: ## What's the difference between SSL and TLS?
 ---
 
 ## What's the difference between SSL and TLS?
@@ -24,10 +23,9 @@ Both SSL and TLS are communication protocols that encrypt data between
 servers, applications, users, and systems. They authenticate two parties
 connected over a network so they can exchange data securely.
 
-Taher Elgamal led the development of SSL and released SSL 2.0 publicly in
-1995. The purpose of SSL was to keep communication secure over the World Wide
+Taher Elgamal led the development of SSL and released SSL 2.0 publicly in 1995. The purpose of SSL was to keep communication secure over the World Wide
 Web. After SSL moved through various iterations, Tim Dierks and Christopher
-Allen created TLS 1.0 in 1999 as the successor to SSL 3.0. 
+Allen created TLS 1.0 in 1999 as the successor to SSL 3.0.
 
 ### Terminology
 
@@ -36,12 +34,12 @@ deprecated. However, it’s common to find the term SSL describing a TLS
 connection. In most cases, the terms SSL and SSL/TLS both refer to the TLS
 protocol and TLS certificates.
 
-### Purpose 
+### Purpose
 
 TLS is a secure communication protocol that enables encryption and
 authentication, and this was true for SSL before it was deprecated. TLS and
 SSL both use digital certificates that facilitate the handshake process and
-establish encrypted communications between a browser and a web server. 
+establish encrypted communications between a browser and a web server.
 
 ### Usage in HTTPS
 
@@ -54,13 +52,13 @@ website’s TLS or SSL certificate. TLS and SSL certificates show that a server
 adheres to the current security standards. You can find evidence about the
 certificate within the browser address bar. An authentic and encrypted
 connection displays https:// instead of https://. The additional s stands for
-secure. 
+secure.
 
 ## Key differences: SSL vs. TLS
 
 While the purposes of SSL and TLS are very similar, these communication
 protocols are distinct in how they operate. These changes developed over time
-as SSL moved through various versions before it was succeeded by TLS. 
+as SSL moved through various versions before it was succeeded by TLS.
 
 ### SSL/TLS handshakes
 
@@ -71,7 +69,7 @@ cryptographic keys.
 An SSL handshake was an explicit connection, while a TLS handshake is an
 implicit one. The SSL handshake process had more steps than the TLS process.
 By removing additional steps and reducing the total number of cipher suites,
-TLS has sped up the process. 
+TLS has sped up the process.
 
 ### Alert messages
 
@@ -94,7 +92,7 @@ attaches it to the original message.
 
 The SSL protocol uses the MD5 algorithm—which is now outdated—for MAC
 generation. TLS uses Hash-Based Message Authentication Code (HMAC) for more
-complex cryptography and security. 
+complex cryptography and security.
 
 ### Cipher suites
 
@@ -112,7 +110,7 @@ refer to TLS certificates.
 
 TLS certificates have iterated upon SSL certificates and improved them over
 time. The final function of SSL certificates and TLS certificates hasn’t
-changed. 
+changed.
 
 ### Should you replace SSL certificates with TLS certificates?
 
@@ -129,3 +127,4 @@ protocols.
 ## Reference
 
 - [https://aws.amazon.com/compare/the-difference-between-ssl-and-tls/](https://aws.amazon.com/compare/the-difference-between-ssl-and-tls/)
+

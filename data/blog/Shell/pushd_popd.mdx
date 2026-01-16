@@ -1,0 +1,214 @@
+---
+title: 'pushd and popd in Shell'
+tags: [Shell]
+date: 2026-01-16
+---
+
+In **shell (bash / zsh)**, `pushd` and `popd` are built-in commands used to **navigate directories using a stack**, not just a single “current directory”.
+
+Think of it as **bookmarking directories and jumping back and forth easily**.
+
+---
+
+## 1. The directory stack (mental model)
+
+The shell maintains a **stack of directories**:
+
+```
+[top]  ← current directory
+        previous directories
+[bottom]
+```
+
+You can view it with:
+
+```sh
+dirs
+```
+
+---
+
+## 2. `pushd` — go to a directory _and remember where you came from_
+
+### Basic usage
+
+```sh
+pushd /path/to/dir
+```
+
+What it does:
+
+1. Saves your **current directory** on the stack
+2. Changes to `/path/to/dir`
+3. Makes the new directory the **top of the stack**
+
+### Example
+
+```sh
+pwd
+# /home/user
+
+pushd /var/log
+# /var/log /home/user
+
+pwd
+# /var/log
+```
+
+Check stack:
+
+```sh
+dirs
+# /var/log /home/user
+```
+
+---
+
+### `pushd` without arguments
+
+```sh
+pushd
+```
+
+This **swaps the top two directories** in the stack — very useful for toggling between two locations.
+
+---
+
+## 3. `popd` — go back to the previous directory
+
+### Basic usage
+
+```sh
+popd
+```
+
+What it does:
+
+1. Removes the **top directory** from the stack
+2. Changes to the new top directory
+
+### Example
+
+Continuing from above:
+
+```sh
+popd
+# /home/user
+
+pwd
+# /home/user
+```
+
+Stack now:
+
+```sh
+dirs
+# /home/user
+```
+
+---
+
+## 4. Why not just use `cd`?
+
+| Command | Behavior                                  |
+| ------- | ----------------------------------------- |
+| `cd`    | Go somewhere, forget previous place       |
+| `pushd` | Go somewhere, **remember previous place** |
+| `popd`  | Go back **automatically**                 |
+
+`pushd/popd` shine when:
+
+- You jump between **multiple directories**
+- You’re writing **scripts**
+- You want to return safely even after many `cd`s
+
+---
+
+## 5. Practical examples
+
+### A. Temporary directory jump
+
+```sh
+pushd /tmp
+# do something
+popd
+```
+
+Equivalent to “go there, then come back”.
+
+---
+
+### B. Multiple locations
+
+```sh
+pushd /etc
+pushd /var/log
+pushd /usr/local/bin
+```
+
+Now:
+
+```sh
+dirs
+# /usr/local/bin /var/log /etc /home/user
+```
+
+Jump back step-by-step:
+
+```sh
+popd   # /var/log
+popd   # /etc
+popd   # /home/user
+```
+
+---
+
+### C. Access stack entries directly
+
+```sh
+dirs -v
+```
+
+Output:
+
+```sh
+0  /usr/local/bin
+1  /var/log
+2  /etc
+3  /home/user
+```
+
+Jump to an entry:
+
+```sh
+pushd +2   # go to /etc
+```
+
+---
+
+## 6. Common options
+
+| Command    | Meaning              |
+| ---------- | -------------------- |
+| `dirs`     | Show directory stack |
+| `dirs -v`  | Numbered stack       |
+| `pushd +N` | Rotate stack         |
+| `popd +N`  | Remove entry N       |
+
+---
+
+## 7. In scripts (best practice)
+
+```sh
+pushd /some/dir > /dev/null
+# do work
+popd > /dev/null
+```
+
+Suppresses noisy output while keeping safety.
+
+---
+
+## 8. One-sentence summary
+
+> **`pushd` remembers where you were before changing directories; `popd` takes you back—using a directory stack instead of forgetting history.**

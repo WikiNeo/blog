@@ -1,0 +1,99 @@
+---
+title: 'What is DDoS (Distributed Denial of Service)?'
+tags: [Network]
+date: 2026-01-16
+---
+
+**DDoS** stands for **Distributed Denial of Service**.
+
+It’s a type of cyberattack where **many machines attack a target at the same time**, overwhelming it so legitimate users can’t access the service.
+
+---
+
+## What happens in a DDoS attack?
+
+![Image](https://cf-assets.www.cloudflare.com/slt3lc6tev37/1FIBEeoyzoa64lVGlWKaRV/3b878bb03df1729b48cd3f667cdfe3de/amplification_ddos_example.png)
+
+![Image](https://www.cloudflare.com/img/learning/ddos/what-is-a-ddos-botnet/ddos-botnet-star-network-topology.png)
+
+![Image](https://www.researchgate.net/profile/Nadeem_Ahmad5/publication/202784990/figure/download/fig15/AS%3A669556804681740%401536646190424/Distributed-Denial-of-Service-Attack.png)
+
+![Image](https://www.researchgate.net/profile/Mehdi_Manna/publication/265053091/figure/download/fig1/AS%3A613946063077392%401523387556221/Architecture-of-Distributed-Denial-of-Service-DDoS-attack.png)
+
+1. **Attacker controls many devices**
+   These devices are often compromised computers, servers, or IoT devices (called a **botnet**).
+
+2. **All devices send traffic simultaneously**
+   They flood the target (website, API, game server, etc.) with requests.
+
+3. **Target is overwhelmed**
+
+   - CPU maxed out
+   - Memory exhausted
+   - Network bandwidth saturated
+
+4. **Legitimate users are denied service**
+   The site becomes slow or completely unavailable.
+
+---
+
+## Why is it called _Distributed_?
+
+Because the attack doesn’t come from one place — it comes from **thousands or millions of sources** across the internet, making it very hard to block.
+
+---
+
+## Common types of DDoS attacks
+
+### 1. **Volume-based attacks**
+
+- Goal: **Consume bandwidth**
+- Example: UDP flood, ICMP (ping) flood
+- Think: _“Too much traffic on the highway”_
+
+### 2. **Protocol attacks**
+
+- Goal: **Exhaust server resources**
+- Example: SYN flood
+- Exploits weaknesses in network protocols
+
+### 3. **Application-layer attacks**
+
+- Goal: **Crash specific services**
+- Example: HTTP GET/POST flood
+- Looks like normal user traffic → hardest to detect
+
+---
+
+## Simple analogy
+
+Imagine a restaurant:
+
+- Normal customers: manageable
+- Suddenly **10,000 fake customers** walk in and order nothing
+- Real customers can’t get a seat
+  ➡️ That’s DDoS
+
+---
+
+## What DDoS is _not_
+
+- ❌ Not hacking into your system
+- ❌ Not stealing data
+- ✅ It’s about **making your service unavailable**
+
+---
+
+## How organizations defend against DDoS
+
+- Rate limiting
+- Traffic filtering
+- Load balancers
+- CDNs (e.g. Cloud-based DDoS protection)
+- Anycast routing
+
+---
+
+## One-sentence summary
+
+> **A DDoS attack overwhelms a service with massive, distributed traffic so real users can’t access it.**

@@ -1,37 +1,165 @@
 ---
 title: 'jq -r'
 tags: [Shell]
-date: 2025-02-26
+date: 2026-01-16
 ---
 
-`jq -r` is a command-line option for the `jq` tool, which is used for processing JSON data. The `-r` (or `--raw-output`) flag tells `jq` to output strings as raw text rather than JSON-encoded strings.
+Let’s break this shell line down **piece by piece**, from right to left, and then put it all together.
 
-## Example Usage
-
-### 1. Without -r (default behavior)
-
-```shell
-echo '{"name": "Alice"}' | jq '.name'
+```sh
+value=$(jq -r '.value // empty' "$CONFIG_FILE")
 ```
 
-**Output:**
+---
 
-```shell
-"Alice"
+## 1️⃣ `$( ... )` — command substitution
+
+```sh
+value=$( ... )
 ```
 
-(Quotes remain because the output is still JSON-encoded) 2. With -r:
+- `$(...)` means **run the command inside and capture its output**
+- The output is assigned to the shell variable `value`
 
-```shell
-echo '{"name": "Alice"}' | jq -r '.name'
+So whatever text the command prints to **stdout** becomes the value of `value`.
+
+---
+
+## 2️⃣ `jq` — JSON processor
+
+`jq` is a command-line tool used to **parse and query JSON files**.
+
+Here it is used to extract a field from a JSON file.
+
+---
+
+## 3️⃣ `-r` — raw output
+
+```sh
+jq -r ...
 ```
 
-Output:
+- `-r` means **raw output**
+- Without `-r`, jq outputs JSON strings with quotes:
 
-Alice
+```json
+"value"
+```
 
-(No quotes, just raw text)
-When to Use -r
+- With `-r`, jq outputs plain text:
 
-    When you need plain text output (e.g., when storing results in a variable or passing them to another command).
-    When working with JSON data that includes URLs, filenames, or command outputs that should not be wrapped in quotes.
+```text
+value
+```
+
+This is important for shell scripting, because you usually **don’t want quotes**.
+
+---
+
+## 4️⃣ `'.value // empty'` — jq filter
+
+This is the most important part.
+
+### `.value`
+
+- Accesses the key named `value` at the top level of the JSON
+
+Example JSON:
+
+```json
+{
+  "value": "hello"
+}
+```
+
+`.value` → `"hello"`
+
+---
+
+### `// empty` — fallback operator
+
+- `//` is jq’s **default / fallback operator**
+- It means:
+
+  > “If the left side is null or missing, use the right side instead”
+
+`empty` is a jq builtin that outputs **nothing at all**.
+
+So:
+
+| JSON case         | Result           |
+| ----------------- | ---------------- |
+| `"value"` exists  | prints its value |
+| `"value": null`   | prints nothing   |
+| `"value"` missing | prints nothing   |
+
+This avoids errors or `"null"` showing up.
+
+---
+
+## 5️⃣ `"$CONFIG_FILE"` — input file
+
+- `$CONFIG_FILE` is a shell variable containing a **path to a JSON file**
+- The quotes protect against spaces in the filename
+
+Example:
+
+```sh
+CONFIG_FILE=config.json
+```
+
+---
+
+## 🔁 Put it all together
+
+This line means:
+
+> **Read a JSON file, extract the `.value` field, print it as plain text if it exists, otherwise print nothing, and store the result in the shell variable `value`.**
+
+---
+
+## ✅ Example walkthrough
+
+### JSON file
+
+```json
+{
+  "value": "production"
+}
+```
+
+### Result
+
+```sh
+value="production"
+```
+
+---
+
+### JSON file (missing key)
+
+```json
+{
+  "env": "production"
+}
+```
+
+### Result
+
+```sh
+value=""
+```
+
+(no error, no `null`, just empty)
+
+---
+
+## 🧠 Why this pattern is popular
+
+- Safe for missing keys
+- No noisy `"null"`
+- No extra quotes
+- Works well with `set -e`
+- Ideal for config files in CI/CD or scripts
+
+---

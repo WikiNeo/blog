@@ -1,0 +1,116 @@
+---
+title: 'exit status $?'
+tags: [Shell]
+date: 2026-01-16
+---
+
+In shell (e.g. **bash**, **sh**, **zsh**), **`$?`** is a **special variable** that stores the **exit status of the most recently executed command**.
+
+---
+
+## What `$?` means
+
+- `$?` → **exit code of the last command**
+- Exit codes are integers:
+
+  - **`0`** → success
+  - **non-zero** → failure (different numbers mean different errors)
+
+---
+
+## Simple examples
+
+### 1️⃣ Check if a command succeeded
+
+```sh
+ls /etc
+echo $?
+```
+
+Output:
+
+```text
+0
+```
+
+Meaning: `ls /etc` ran successfully.
+
+---
+
+### 2️⃣ Check if a command failed
+
+```sh
+ls /not-exist
+echo $?
+```
+
+Output:
+
+```text
+2
+```
+
+Meaning: `ls` failed (directory doesn’t exist).
+
+---
+
+## Typical usage in scripts
+
+### Conditional check
+
+```sh
+some_command
+if [ $? -ne 0 ]; then
+    echo "Command failed"
+    exit 1
+fi
+```
+
+### Shorter, idiomatic form (preferred)
+
+```sh
+some_command || {
+    echo "Command failed"
+    exit 1
+}
+```
+
+---
+
+## Important details ⚠️
+
+1. **`$?` is overwritten immediately**
+
+   ```sh
+   false
+   echo "hello"
+   echo $?
+   ```
+
+   This prints `0` (from `echo`), **not** from `false`.
+
+2. **Always read `$?` immediately after the command**
+
+   ```sh
+   false
+   echo $?   # correct
+   ```
+
+3. In pipelines:
+
+   ```sh
+   cmd1 | cmd2
+   echo $?
+   ```
+
+   `$?` is the exit code of **`cmd2`**, not `cmd1`.
+
+---
+
+## Quick mental model
+
+> `$?` answers:
+> **“Did the last command succeed?”**
+
+- `0` → yes
+- non-zero → no

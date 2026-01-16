@@ -1,0 +1,150 @@
+---
+title: 'X509 Authentication'
+tags: [Network]
+date: 2026-01-16
+---
+
+## What is **X.509 authentication**?
+
+**X.509 authentication** is an authentication mechanism that uses **digital certificates** (defined by the X.509 standard) to prove the identity of a **user, device, or service** using **public-key cryptography** instead of passwords.
+
+It’s most commonly used in **TLS/SSL**, **mutual TLS (mTLS)**, **VPNs**, **enterprise PKI**, and **cloud/Kubernetes security**.
+
+---
+
+## Core idea (in one sentence)
+
+> An entity proves who it is by presenting a **signed certificate**, and proving it owns the **private key** corresponding to that certificate.
+
+---
+
+## What is an X.509 certificate?
+
+An **X.509 certificate** is a structured, signed document that binds:
+
+| Field          | Meaning                                                |
+| -------------- | ------------------------------------------------------ |
+| **Subject**    | Who the certificate identifies (user, server, service) |
+| **Public Key** | Cryptographic identity                                 |
+| **Issuer**     | Certificate Authority (CA) that signed it              |
+| **Validity**   | Start and expiry time                                  |
+| **Extensions** | Usage rules (TLS server, client auth, email, etc.)     |
+| **Signature**  | CA’s cryptographic signature                           |
+
+The **private key never leaves the owner**.
+
+---
+
+## How X.509 authentication works (step by step)
+
+### 1️⃣ Certificate issuance
+
+- A **Certificate Authority (CA)** signs a certificate after verifying identity
+- The subject receives:
+
+  - `certificate.pem` (public)
+  - `private.key` (secret)
+
+### 2️⃣ Authentication
+
+- Client sends its **certificate**
+- Server:
+
+  - Verifies CA signature
+  - Checks expiration & revocation
+
+- Client **cryptographically proves** it owns the private key (challenge–response)
+
+### 3️⃣ Trust decision
+
+- If all checks pass → authentication succeeds
+
+No passwords involved.
+
+---
+
+## X.509 vs username/password
+
+| Aspect              | X.509 auth             | Password auth              |
+| ------------------- | ---------------------- | -------------------------- |
+| Secret exposure     | Private key never sent | Password often transmitted |
+| Phishing resistant  | ✅ Yes                 | ❌ No                      |
+| Automation-friendly | ✅ Excellent           | ❌ Poor                    |
+| Scalability         | High (PKI-based)       | Low                        |
+| Human memory needed | ❌ No                  | ✅ Yes                     |
+
+---
+
+## Mutual TLS (mTLS): the classic X.509 use case
+
+In **mTLS**, **both sides authenticate each other**:
+
+| Party  | What it proves              |
+| ------ | --------------------------- |
+| Server | “I am the real server”      |
+| Client | “I am an authorized client” |
+
+Used heavily in:
+
+- Kubernetes service-to-service auth
+- Zero-trust networks
+- Internal APIs
+
+---
+
+## Common real-world uses
+
+### 🔐 Web & networking
+
+- HTTPS (server authentication)
+- mTLS (client + server auth)
+- VPN authentication
+
+### ☁️ Cloud & DevOps
+
+- Kubernetes API access
+- Service mesh (Istio, Linkerd)
+- Cloud workload identity
+
+### 🏢 Enterprise
+
+- Smart cards
+- Device authentication
+- Email signing (S/MIME)
+
+---
+
+## Example (conceptual)
+
+```text
+Client → Server: Here is my certificate
+Server → Client: Prove you own the private key
+Client → Server: Cryptographic proof
+Server: Identity verified ✔
+```
+
+---
+
+## Why X.509 is considered “strong” authentication
+
+- Based on **asymmetric cryptography**
+- Resistant to:
+
+  - Replay attacks
+  - Credential stuffing
+  - Phishing
+
+- Supports **fine-grained trust chains**
+- Works well for **machines**, not just humans
+
+---
+
+## When X.509 auth might be overkill
+
+- Small internal apps
+- Short-lived prototypes
+- Human-only login systems
+
+(It shines most in **infrastructure and automation**.)
+
+---

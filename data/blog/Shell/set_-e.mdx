@@ -1,21 +1,108 @@
 ---
-title: "set -e"
+title: 'set -exu'
 tags: [Shell]
-date: 2023-11-03
-summary: preceded by the !
+date: 2026-01-16
 ---
 
-```shell
-set or unset options and positional parameters
+`set -exu` is a **shell built-in command** (commonly used in `bash` scripts) that changes how the shell behaves.
+Each letter after `-` is an **option**.
+
+Let’s break it down:
+
+---
+
+## `set -e` — _Exit on error_
+
+- If **any command returns a non-zero exit status**, the script **stops immediately**.
+- Prevents scripts from continuing in a broken state.
+
+**Example**
+
+```sh
+cp missing_file.txt /tmp
+echo "This will NOT run"
 ```
 
-```
--e     When this option is on, if a simple command fails for any of the reasons listed in Consequences of
-       Shell  Errors or returns an exit status value >0, and is not part of the compound list following a
-       while, until, or if keyword, and is not a part of an AND  or  OR  list,  and  is  not  a  pipeline
-       preceded by the ! reserved word, then the shell shall immediately exit.
+If `missing_file.txt` doesn’t exist, the script exits before the `echo`.
+
+📌 Exception: commands in `if`, `while`, `until`, `&&`, `||` are treated specially.
+
+---
+
+## `set -x` — _Execution trace (debug mode)_
+
+- Prints **each command and its arguments** to stderr **before execution**.
+- Very useful for debugging scripts.
+
+**Example output**
+
+```sh
++ echo Hello
+Hello
++ ls /tmp
 ```
 
-## Reference
+This shows exactly what the shell is executing.
 
-- [https://explainshell.com/explain?cmd=set+-e#](https://explainshell.com/explain?cmd=set+-e#)
+---
+
+## `set -u` — _Treat unset variables as errors_
+
+- Using an **unset variable** causes the script to **exit immediately**.
+- Helps catch typos and missing environment variables early.
+
+**Example**
+
+```sh
+echo "$USERNAME"
+```
+
+If `USERNAME` is not set → script exits with an error.
+
+You can safely handle defaults like this:
+
+```sh
+echo "${USERNAME:-default_user}"
+```
+
+---
+
+## Combined meaning of `set -exu`
+
+When used together, it means:
+
+> **Run in strict, safe, and debuggable mode**
+
+- ❌ Stop on errors (`-e`)
+- 🔍 Show commands as they run (`-x`)
+- ⚠️ Fail on unset variables (`-u`)
+
+This combination is **very common in production-quality shell scripts** and CI/CD pipelines.
+
+---
+
+## Common alternative: `set -Eeuo pipefail`
+
+You may also see:
+
+```sh
+set -Eeuo pipefail
+```
+
+Adds:
+
+- `-E` → traps work in functions/subshells
+- `pipefail` → pipelines fail if **any** command fails
+
+---
+
+### TL;DR
+
+```sh
+set -exu
+```
+
+means:
+
+> _“Fail fast, show me everything, and don’t tolerate sloppy variables.”_
+
