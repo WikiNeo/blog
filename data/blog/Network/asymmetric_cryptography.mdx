@@ -1,0 +1,96 @@
+---
+title: 'What is Asymmetric Cryptography?'
+tags: [Network]
+date: 2026-01-19
+---
+
+**Asymmetric cryptography** (also called **public-key cryptography**) is a type of encryption that uses **two different but mathematically related keys**:
+
+- **Public key** → shared with everyone
+- **Private key** → kept secret by the owner
+
+What one key encrypts, **only the other key can decrypt**.
+
+---
+
+## How it works (simple idea)
+
+1. You generate a **key pair**: public + private
+2. You share your **public key**
+3. Someone encrypts data using your **public key**
+4. Only **your private key** can decrypt that data
+
+So even if attackers intercept the encrypted message, they **cannot read it** without the private key.
+
+---
+
+## Why asymmetric cryptography is useful
+
+It solves a major problem of symmetric cryptography:
+
+> **How do we securely share a secret key in the first place?**
+
+With asymmetric cryptography:
+
+- No secret needs to be exchanged ahead of time
+- Trust can be established over insecure networks (like the internet)
+
+---
+
+## Common use cases
+
+### 1. Secure communication (HTTPS / TLS)
+
+- Your browser uses the server’s **public key**
+- A secure connection is established without sharing secrets openly
+
+### 2. Digital signatures
+
+- Sender signs data with their **private key**
+- Anyone can verify it using the **public key**
+- Ensures:
+
+  - Authenticity
+  - Integrity
+  - Non-repudiation
+
+### 3. Key exchange
+
+- Asymmetric crypto is often used to **safely exchange a symmetric key**
+- After that, faster symmetric encryption is used for data transfer
+
+---
+
+## Popular asymmetric algorithms
+
+| Algorithm                             | Purpose                         |
+| ------------------------------------- | ------------------------------- |
+| **RSA**                               | Encryption, digital signatures  |
+| **ECC (Elliptic Curve Cryptography)** | Smaller keys, higher efficiency |
+| **DSA / ECDSA**                       | Digital signatures              |
+| **Diffie-Hellman (DH / ECDH)**        | Secure key exchange             |
+
+---
+
+## Asymmetric vs Symmetric (quick comparison)
+
+| Feature    | Asymmetric               | Symmetric            |
+| ---------- | ------------------------ | -------------------- |
+| Keys       | Public + Private         | Single shared key    |
+| Speed      | Slower                   | Faster               |
+| Security   | Easier key distribution  | Harder key sharing   |
+| Common use | Key exchange, signatures | Bulk data encryption |
+
+👉 **In practice:** both are used together.
+
+---
+
+## Real-world analogy
+
+🔐 **Mailbox example**
+
+- Public key = mailbox slot (anyone can drop a letter)
+- Private key = mailbox key (only you can open it)
+
+---
+
