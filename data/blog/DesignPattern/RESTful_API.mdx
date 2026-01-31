@@ -1,69 +1,202 @@
 ---
-title: "RESTful API"
+title: "What is RESTful API?"
 tags: [DesignPattern]
-date: 2022-06-17
+date: 2026-01-31
 ---
 
-## What is RESTful API?
+A **RESTful API** is a way for software systems to **talk to each other over HTTP** using a simple, predictable set of rules.
+REST stands for **Representational State Transfer**—a design style, not a protocol.
 
-RESTful API is an interface that two computer systems use to exchange
-information securely over the internet. RESTful APIs support information
-exchange by following secure, reliable, and efficient software communication
-standards.
+Think of it as:
 
-## What is an API?
+> *“Use the web the way the web was meant to be used.”*
 
-An application programming interface (API) defines the rules that you must
-follow to communicate with other software systems.
+---
 
-### Clients
+## Core idea (in one sentence)
 
-Clients are users who want to access information from the web.
+A RESTful API exposes **resources** (things) via **URLs**, manipulates them using **standard HTTP methods**, and exchanges **representations** (usually JSON).
 
-### Resources
+---
 
-Resources are the information that different applications provide to their
-clients.
+## 1️⃣ Resources (nouns, not verbs)
 
-### Server
+Everything is a **resource**, identified by a URL:
 
-The machine that gives the resources to the client is called the server.
+```
+/users
+/users/42
+/orders/123/items
+```
 
-## What is REST?
+✔ Good
 
-Representational State Transfer (REST) is a software architecture that imposes
-conditions on how an API should work.
+```
+GET /users/42
+```
 
-### Uniform interface
+❌ Not RESTful
 
-It indicates that the server transfers information in a standard format.
+```
+GET /getUser?id=42
+```
 
-1. Requests should identify resources. They do so by using a uniform resource identifier.
-2. Clients have enough information in the resource representation to modify or delete the resource if they want to. The server meets this condition by sending metadata that describes the resource further.
-3. Clients receive information about how to process the representation further. The server achieves this by sending self-descriptive messages that contain metadata about how the client can best use them.
-4. Clients receive information about all other related resources they need to complete a task. The server achieves this by sending hyperlinks in the representation so that clients can dynamically discover more resources.
+Resources are **nouns**, actions come from HTTP verbs.
 
-### Statelessness
+---
 
-In REST architecture, statelessness refers to a communication method in which the server completes every client request independently of all previous requests
+## 2️⃣ HTTP methods (the actions)
 
-### Layered system
+REST reuses standard HTTP verbs with clear meanings:
 
-In a layered system architecture, the client can connect to other authorized intermediaries between the client and server, and it will still receive responses from the server.
+| Method | Meaning        | Example            |
+| ------ | -------------- | ------------------ |
+| GET    | Read           | `GET /users/42`    |
+| POST   | Create         | `POST /users`      |
+| PUT    | Replace        | `PUT /users/42`    |
+| PATCH  | Partial update | `PATCH /users/42`  |
+| DELETE | Remove         | `DELETE /users/42` |
 
-### Cacheability
+This is one of REST’s biggest wins: **no custom action vocabulary**.
 
-RESTful web services support caching, which is the process of storing some responses on the client or on an intermediary to improve server response time.
+---
 
-### Code on demand
+## 3️⃣ Statelessness
 
-In REST architectural style, servers can temporarily extend or customize
-client functionality by transferring software programming code to the client.
-For example, when you fill a registration form on any website, your browser
-immediately highlights any mistakes you make, such as incorrect phone numbers.
-It can do this because of the code sent by the server.
+Each request is **independent**.
 
-## Reference
+* The server does **not remember** previous requests
+* All required info is in the request (headers, tokens, body)
 
-- [https://aws.amazon.com/what-is/restful-api/](https://aws.amazon.com/what-is/restful-api/)
+✔ Example:
+
+```http
+Authorization: Bearer <token>
+```
+
+This makes APIs:
+
+* Easier to scale
+* Easier to cache
+* Easier to debug
+
+---
+
+## 4️⃣ Representations (usually JSON)
+
+The API returns a **representation** of a resource:
+
+```json
+{
+  "id": 42,
+  "name": "Alice",
+  "email": "alice@example.com"
+}
+```
+
+Same resource, different formats are possible:
+
+* JSON (most common)
+* XML
+* HTML (rare in APIs)
+
+---
+
+## 5️⃣ Proper HTTP status codes
+
+RESTful APIs **use HTTP status codes correctly**:
+
+| Code | Meaning      |
+| ---- | ------------ |
+| 200  | OK           |
+| 201  | Created      |
+| 204  | No Content   |
+| 400  | Bad Request  |
+| 401  | Unauthorized |
+| 403  | Forbidden    |
+| 404  | Not Found    |
+| 409  | Conflict     |
+| 500  | Server Error |
+
+❌ Bad:
+
+```json
+{ "success": false, "errorCode": 404 }
+```
+
+✔ Good:
+
+```http
+HTTP/1.1 404 Not Found
+```
+
+---
+
+## 6️⃣ Optional but “more REST”: HATEOAS
+
+Hypermedia links guide the client:
+
+```json
+{
+  "id": 42,
+  "name": "Alice",
+  "links": {
+    "self": "/users/42",
+    "orders": "/users/42/orders"
+  }
+}
+```
+
+Very “pure REST”, rarely used in practice—but good to know.
+
+---
+
+## What REST is **not**
+
+* ❌ Not tied to JSON (that’s just common)
+* ❌ Not the same as HTTP (it uses HTTP)
+* ❌ Not enforced by a spec like OpenAPI
+* ❌ Not automatically “good design”
+
+---
+
+## REST vs others (quick comparison)
+
+| Style   | Key idea                     |
+| ------- | ---------------------------- |
+| REST    | Resources + HTTP semantics   |
+| RPC     | Call functions (`getUser()`) |
+| GraphQL | Client chooses data shape    |
+| gRPC    | Binary, high-performance RPC |
+
+---
+
+## Minimal RESTful example
+
+```http
+POST /users
+Content-Type: application/json
+
+{
+  "name": "Alice"
+}
+```
+
+Response:
+
+```http
+HTTP/1.1 201 Created
+Location: /users/42
+```
+
+---
+
+## One-line summary
+
+A **RESTful API** is an API that:
+
+* models data as **resources**
+* uses **HTTP methods** correctly
+* is **stateless**
+* returns **representations** with proper **status codes**
 
