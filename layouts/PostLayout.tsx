@@ -9,6 +9,7 @@ import Image from '@/components/Image'
 import Tag from '@/components/Tag'
 import siteMetadata from '@/data/siteMetadata'
 import ScrollTopAndComment from '@/components/ScrollTopAndComment'
+import RandomBlogButton from '@/components/RandomBlogButton'
 
 const editUrl = (path) => `${siteMetadata.siteRepo}/blob/main/data/${path}`
 const discussUrl = (path) =>
@@ -195,7 +196,7 @@ export default function PostLayout({
                   </div>
                 )}
               </div>
-              <div className="pt-4 xl:pt-8">
+              <div className="flex items-center justify-between pt-4 xl:pt-8">
                 <Link
                   href={`/${basePath}`}
                   className="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400"
@@ -203,6 +204,7 @@ export default function PostLayout({
                 >
                   &larr; Back to the blog
                 </Link>
+                <RandomBlogButton />
               </div>
             </footer>
           </div>
