@@ -8,6 +8,7 @@ import PageTitle from '@/components/PageTitle'
 import SectionContainer from '@/components/SectionContainer'
 import siteMetadata from '@/data/siteMetadata'
 import ScrollTopAndComment from '@/components/ScrollTopAndComment'
+import RandomBlogButton from '@/components/RandomBlogButton'
 
 interface LayoutProps {
   content: CoreContent<Blog>
@@ -124,6 +125,9 @@ export default function PostLayout({
                     </Link>
                   </div>
                 )}
+              </div>
+              <div className="flex justify-center pt-4 xl:pt-8">
+                <RandomBlogButton />
               </div>
             </footer>
           </div>
