@@ -1,0 +1,172 @@
+---
+title: 'Closures in Python'
+tags: [Python]
+date: 2026-02-04
+---
+
+Closures are one of those Python features that sound scary until you see them—and then they click 😄
+Let’s walk through it gently.
+
+---
+
+## The idea in plain English
+
+A **closure** is a function that:
+
+- is defined **inside another function**
+- **remembers variables** from the outer function **even after the outer function has finished running**
+
+So the inner function “closes over” those variables. Hence the name _closure_.
+
+---
+
+## A tiny example
+
+```python
+def outer():
+    x = 10
+
+    def inner():
+        print(x)
+
+    return inner
+```
+
+Now watch this:
+
+```python
+f = outer()   # outer() finishes execution
+f()           # prints 10
+```
+
+Even though `outer()` is done, `inner()` still remembers `x = 10`.
+
+👉 That’s a closure.
+
+---
+
+## Why is this interesting?
+
+Because normally, local variables disappear when a function returns.
+Closures **keep them alive**.
+
+---
+
+## Another example (more practical)
+
+```python
+def make_multiplier(n):
+    def multiplier(x):
+        return x * n
+    return multiplier
+```
+
+Use it like this:
+
+```python
+double = make_multiplier(2)
+triple = make_multiplier(3)
+
+print(double(5))   # 10
+print(triple(5))   # 15
+```
+
+What’s happening:
+
+- `n` is local to `make_multiplier`
+- each returned `multiplier` function **remembers its own `n`**
+- `double` remembers `n = 2`
+- `triple` remembers `n = 3`
+
+Each returned function has its **own closure state**.
+
+---
+
+## Key properties of closures
+
+A function is a closure if:
+
+1. It is **nested** (defined inside another function)
+2. It **references variables** from the outer function
+3. The outer function has **already returned**
+
+---
+
+## Inspecting a closure (optional nerd bit 🤓)
+
+```python
+print(double.__closure__)
+```
+
+You’ll see something like:
+
+```text
+(<cell at 0x...: int object at ...>,)
+```
+
+That “cell” is where Python stores the remembered value (`n = 2`).
+
+---
+
+## Modifying outer variables: `nonlocal`
+
+If you want to **change** a captured variable:
+
+```python
+def counter():
+    count = 0
+
+    def inc():
+        nonlocal count
+        count += 1
+        return count
+
+    return inc
+```
+
+```python
+c = counter()
+c()  # 1
+c()  # 2
+c()  # 3
+```
+
+Without `nonlocal`, Python would think `count` is a new local variable.
+
+---
+
+## When are closures actually useful?
+
+Closures are great for:
+
+- **Function factories** (like `make_multiplier`)
+- **Configuration without globals**
+- **Callbacks**
+- **Decorators** (closures are the backbone of decorators)
+- Keeping state without using classes
+
+---
+
+## Closures vs classes (intuition)
+
+This:
+
+```python
+def make_adder(n):
+    return lambda x: x + n
+```
+
+Is conceptually similar to:
+
+```python
+class Adder:
+    def __init__(self, n):
+        self.n = n
+
+    def __call__(self, x):
+        return x + self.n
+```
+
+Closures = lightweight objects with hidden state.
+
+---
