@@ -1,42 +1,373 @@
 ---
 title: 'Binary Trees Terminology'
 tags: [Tree]
-date: 2019-09-15
+date: 2026-02-11
 ---
 
-- **leaves**: nodes with no children.
-- **siblings**: nodes with the same parent.
-- **depth of node**: number of edges from the root to the node
-- **height of node**: number of edges from the node to the deepest leaf
-- **height of tree**: height of the root
-- **full binary tree**: a binary tree in which each node has exactly zero or two children
-- **complete binary tree**: a binary tree which is completely filled, with the possible
-  exception of the bottom level, which is filled from left to right.
+## 🌳 Binary Tree Terminology (Clear & Structured Guide)
 
-References: [https://www.cs.cmu.edu/~adamchik/15-121/lectures/Trees/trees.html](https://www.cs.cmu.edu/~adamchik/15-121/lectures/Trees/trees.html)
+A **binary tree** is a hierarchical data structure where each node has **at most two children** — usually called **left child** and **right child**.
 
-## Leaf
+Since you’re comfortable with data structures (given your Git and system-level questions before), I’ll keep this technically precise but clean.
 
-A node with no children
+---
 
-## Node
+## 1️⃣ Basic Components
 
-### Depth of a node
+### 🔹 Node
 
-The depth of a node is the number of edges from the node to the
-tree's root node. A root node will have a depth of 0.
+A fundamental unit of a tree containing:
 
-### Height of a node
+* A value (data)
+* A left child pointer/reference
+* A right child pointer/reference
 
-The height of a node is the number of edges on the longest path from
-the node to a leaf. A leaf node will have a height of 0.
+```python
+class Node:
+    def __init__(self, value):
+        self.value = value
+        self.left = None
+        self.right = None
+```
 
-## Tree
+---
 
-### Height of a tree
+### 🔹 Root
 
-The height of a tree would be the height of its root node, or equivalently, the depth of its deepest node.
+The **topmost node** of the tree.
 
-### Diameter (or width) of a tree
+Example:
 
-The diameter (or width) of a tree is the number of nodes on the longest path between any two leaf nodes.
+```
+      10
+     /  \
+    5    20
+```
+
+Here, `10` is the **root**.
+
+---
+
+### 🔹 Parent and Child
+
+If node A connects to node B downward:
+
+* A = **parent**
+* B = **child**
+
+In the above example:
+
+* 10 is parent of 5 and 20
+* 5 and 20 are children of 10
+
+---
+
+### 🔹 Siblings
+
+Nodes that share the same parent.
+
+* 5 and 20 are siblings.
+
+---
+
+### 🔹 Leaf Node
+
+A node with **no children**.
+
+In this tree:
+
+```
+      10
+     /  \
+    5    20
+```
+
+Nodes `5` and `20` are **leaf nodes**.
+
+---
+
+### 🔹 Internal Node
+
+Any node that is **not a leaf**.
+
+Here:
+
+* 10 is an internal node.
+
+---
+
+## 2️⃣ Structural Terminology
+
+### 🔹 Subtree
+
+A node together with all its descendants.
+
+Example:
+The subtree rooted at 5:
+
+```
+    5
+```
+
+If it had children, they would be included.
+
+---
+
+### 🔹 Depth
+
+Number of edges from root to a node.
+
+Example:
+
+```
+      10        (depth 0)
+     /  \
+    5    20     (depth 1)
+         /
+        15      (depth 2)
+```
+
+* Depth(10) = 0
+* Depth(15) = 2
+
+---
+
+### 🔹 Height
+
+Number of edges in the longest path from a node to a leaf.
+
+* Height of a leaf = 0
+* Height of the tree = height of root
+
+For the above tree:
+
+* Height(15) = 0
+* Height(20) = 1
+* Height(10) = 2
+
+---
+
+### 🔹 Level
+
+Sometimes used interchangeably with depth, but often:
+
+```
+level = depth + 1
+```
+
+Root is level 1.
+
+---
+
+## 3️⃣ Types of Binary Trees
+
+---
+
+### 🔹 Full Binary Tree
+
+Every node has **either 0 or 2 children**.
+
+```
+      10
+     /  \
+    5    20
+   / \
+  3   7
+```
+
+---
+
+### 🔹 Complete Binary Tree
+
+All levels are filled except possibly the last,
+and nodes are filled **left to right**.
+
+Example:
+
+```
+      1
+     / \
+    2   3
+   / \  /
+  4  5 6
+```
+
+Used in:
+
+* Heaps
+* Priority queues
+
+---
+
+### 🔹 Perfect Binary Tree
+
+All internal nodes have 2 children,
+and all leaves are at the same level.
+
+Height = h
+Nodes = 2^(h+1) - 1
+
+---
+
+### 🔹 Balanced Binary Tree
+
+Height difference between left and right subtree is small
+(often ≤ 1 for every node).
+
+Example:
+
+* AVL tree
+* Red-Black tree
+
+---
+
+### 🔹 Skewed Tree
+
+All nodes lean to one side.
+
+Left-skewed:
+
+```
+    10
+    /
+   5
+  /
+ 3
+```
+
+Worst-case height = n
+Behaves like a linked list.
+
+---
+
+## 4️⃣ Special Binary Trees
+
+### 🔹 Binary Search Tree (BST)
+
+For every node:
+
+```
+left subtree < node < right subtree
+```
+
+Example:
+
+```
+      10
+     /  \
+    5    20
+         /
+        15
+```
+
+Why important?
+
+* Average search: O(log n)
+* Worst case: O(n) if skewed
+
+---
+
+### 🔹 Heap (Binary Heap)
+
+Complete binary tree where:
+
+* Min-heap: parent ≤ children
+* Max-heap: parent ≥ children
+
+---
+
+## 5️⃣ Traversal Terminology
+
+Traversal = visiting all nodes in some order.
+
+### 🔹 DFS Traversals
+
+**Inorder (LNR)**
+Left → Node → Right
+(BST gives sorted order)
+
+**Preorder (NLR)**
+Node → Left → Right
+(used for tree copy)
+
+**Postorder (LRN)**
+Left → Right → Node
+(used for deletion)
+
+Example:
+
+```
+      10
+     /  \
+    5    20
+```
+
+* Inorder: 5, 10, 20
+* Preorder: 10, 5, 20
+* Postorder: 5, 20, 10
+
+---
+
+### 🔹 BFS (Level Order)
+
+Visit level by level:
+
+10 → 5 → 20
+
+Uses a queue.
+
+```python
+from collections import deque
+
+def level_order(root):
+    if not root:
+        return
+    
+    queue = deque([root])
+    
+    while queue:
+        node = queue.popleft()
+        print(node.value)
+        
+        if node.left:
+            queue.append(node.left)
+        if node.right:
+            queue.append(node.right)
+```
+
+---
+
+## 6️⃣ Important Mathematical Properties
+
+For a binary tree:
+
+* Maximum nodes at level `d` = 2^d
+* Maximum nodes in height `h` tree = 2^(h+1) - 1
+* Minimum height for n nodes ≈ log₂(n)
+
+---
+
+## 7️⃣ Edge Cases to Know (Interview Favorites)
+
+* Empty tree (root = None)
+* Single-node tree
+* Completely skewed tree
+* Balanced vs unbalanced height
+* Null children handling
+
+---
+
+# 🎯 Summary Mental Model
+
+Think of binary tree as:
+
+```
+Recursive structure
+node
+ ├── left subtree
+ └── right subtree
+```
+
+Everything — height, traversal, search — is recursive by nature.
+
+---
