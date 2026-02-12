@@ -1,0 +1,134 @@
+---
+title: 'RFC and ADR in architecture and engineering documentation'
+tags: [SoftwareEngineering]
+date: 2026-02-12
+---
+
+In architecture and engineering documentation, **RFC** and **ADR** are two common but distinct types of documents used to drive clarity and alignment.
+
+---
+
+## 1️⃣ RFC — _Request for Comments_
+
+### What it is
+
+An **RFC** is a proposal document used to present a new idea, change, or improvement and gather feedback before making a decision.
+
+### Purpose
+
+- Socialize a proposal early
+- Collect feedback from stakeholders
+- Surface risks and alternatives
+- Build alignment before implementation
+
+### When to use it
+
+- Proposing a new system or major feature
+- Suggesting architectural changes
+- Introducing new tooling or frameworks
+- Changing APIs or core workflows
+
+### Typical RFC Structure
+
+- **Title**
+- **Author(s)**
+- **Status** (Draft, Reviewing, Approved, Rejected)
+- **Background / Context**
+- **Problem Statement**
+- **Proposed Solution**
+- **Alternatives Considered**
+- **Trade-offs**
+- **Open Questions**
+- **Rollout Plan**
+- **Impact / Risks**
+
+### Key Characteristic
+
+➡️ An RFC is **forward-looking and discussion-oriented**.
+
+It exists to answer:
+
+> “Should we do this, and how?”
+
+---
+
+## 2️⃣ ADR — _Architecture Decision Record_
+
+### What it is
+
+An **ADR** is a document that records a final architectural decision and the reasoning behind it.
+
+### Purpose
+
+- Capture why a decision was made
+- Preserve context for future engineers
+- Prevent re-litigating past decisions
+- Provide historical traceability
+
+### When to use it
+
+- After a significant architectural decision is made
+- When selecting technologies
+- When defining system boundaries or patterns
+- When making irreversible trade-offs
+
+### Typical ADR Structure
+
+- **Title**
+- **Status** (Proposed, Accepted, Deprecated, Superseded)
+- **Context**
+- **Decision**
+- **Consequences**
+- **Alternatives Considered**
+
+### Key Characteristic
+
+➡️ An ADR is **backward-looking and record-oriented**.
+
+It answers:
+
+> “What did we decide and why?”
+
+---
+
+# 🔄 How RFC and ADR Work Together
+
+Often they are part of the same lifecycle:
+
+1. **RFC is written** → discussion and feedback
+2. RFC is approved
+3. Key decisions are extracted into one or more **ADRs**
+4. ADR becomes part of the permanent architecture record
+
+Think of it like:
+
+- RFC = _Debate & Proposal_
+- ADR = _Decision & Documentation_
+
+---
+
+# 🆚 Quick Comparison
+
+| Aspect            | RFC                       | ADR                                    |
+| ----------------- | ------------------------- | -------------------------------------- |
+| Purpose           | Propose & gather feedback | Record a decision                      |
+| Timing            | Before decision           | After decision                         |
+| Tone              | Exploratory               | Authoritative                          |
+| Changes over time | May evolve during review  | Usually immutable (new ADR if changed) |
+| Audience          | Broad stakeholders        | Future engineers & maintainers         |
+
+---
+
+# 🧠 Why They Matter
+
+Without RFCs:
+
+- Decisions are made without alignment.
+- Surprises happen late.
+
+Without ADRs:
+
+- Context is lost.
+- Teams re-argue old decisions.
+- Knowledge disappears when people leave.
+
