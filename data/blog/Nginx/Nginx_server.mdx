@@ -1,18 +1,170 @@
 ---
-title: 'Nginx server'
-tags: [Nginx]
-date: 2024-03-09
+title: 'NGINX server'
+tags: [NGINX]
+date: 2026-02-13
 ---
 
+In **NGINX**, the `server` directive defines a **virtual server (virtual host)**. It tells NGINX how to handle requests for a specific domain, IP, or port.
+
+It must be placed inside the `http` block.
+
+---
+
+## Basic Structure
+
+```nginx
+http {
+    server {
+        listen 80;
+        server_name example.com www.example.com;
+
+        root /var/www/html;
+        index index.html;
+
+        location / {
+            try_files $uri $uri/ =404;
+        }
+    }
+}
 ```
-Syntax:  server { ... }
-Default: —
-Context: http
+
+---
+
+# Key `server` Directive Parameters
+
+### 1️⃣ `listen`
+
+Defines the IP address and port the server listens on.
+
+```nginx
+listen 80;
+listen 443 ssl;
+listen 127.0.0.1:8080;
+listen [::]:80;  # IPv6
 ```
 
-Sets configuration for a virtual server. There is no clear separation between IP-based (based on the IP address) and name-based (based on the “Host” request header field) virtual servers. Instead, the listen directives describe all addresses and ports that should accept connections for the server, and the server_name directive lists all server names.
+Options:
 
-## Reference
+- `ssl`
+- `http2`
+- `default_server`
 
-- [https://nginx.org/en/docs/http/ngx_http_core_module.html#server](https://nginx.org/en/docs/http/ngx_http_core_module.html#server)
+Example:
 
+```nginx
+listen 80 default_server;
+```
+
+---
+
+### 2️⃣ `server_name`
+
+Specifies the domain names this server responds to.
+
+```nginx
+server_name example.com www.example.com;
+```
+
+Supports:
+
+- Exact names
+- Wildcards (`*.example.com`)
+- Regex
+
+```nginx
+server_name *.example.com;
+server_name ~^api\d+\.example\.com$;
+```
+
+---
+
+### 3️⃣ `root`
+
+Sets the document root.
+
+```nginx
+root /var/www/app;
+```
+
+---
+
+### 4️⃣ `index`
+
+Defines default file when directory is requested.
+
+```nginx
+index index.html index.htm index.php;
+```
+
+---
+
+### 5️⃣ `location`
+
+Handles specific request paths inside a server block.
+
+```nginx
+location /api/ {
+    proxy_pass http://backend;
+}
+```
+
+---
+
+### 6️⃣ SSL Example Server Block
+
+```nginx
+server {
+    listen 443 ssl http2;
+    server_name example.com;
+
+    ssl_certificate /etc/nginx/ssl/cert.pem;
+    ssl_certificate_key /etc/nginx/ssl/key.pem;
+
+    location / {
+        proxy_pass http://localhost:3000;
+    }
+}
+```
+
+---
+
+# Multiple Server Blocks (Virtual Hosts)
+
+```nginx
+server {
+    listen 80;
+    server_name site1.com;
+    root /var/www/site1;
+}
+
+server {
+    listen 80;
+    server_name site2.com;
+    root /var/www/site2;
+}
+```
+
+NGINX selects the server block based on:
+
+1. `listen` match
+2. `server_name` match
+3. `default_server` if no match
+
+---
+
+# Where It Lives
+
+Usually in:
+
+```
+/etc/nginx/nginx.conf
+```
+
+or
+
+```
+/etc/nginx/conf.d/*.conf
+/etc/nginx/sites-available/*
+```
+
+---

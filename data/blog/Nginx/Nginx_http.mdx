@@ -1,18 +1,134 @@
 ---
-title: 'Nginx http'
-tags: [Nginx]
-date: 2024-03-10
+title: 'NGINX http'
+tags: [NGINX]
+date: 2026-02-13
 ---
 
+In the context of **AWS / GCP deployments**, `nginx http` usually refers to the **HTTP block** inside the NGINX configuration.
+
+NGINX config structure looks like this:
+
+```nginx
+events {
+    worker_connections 1024;
+}
+
+http {
+    include       mime.types;
+    default_type  application/octet-stream;
+
+    sendfile        on;
+    keepalive_timeout  65;
+
+    server {
+        listen 80;
+        server_name example.com;
+
+        location / {
+            root /usr/share/nginx/html;
+            index index.html;
+        }
+    }
+}
 ```
-Syntax:  http { ... }
-Default: —
-Context: main
+
+---
+
+# 🔹 What is the `http` block?
+
+The `http {}` block is the **top-level configuration context for HTTP and HTTPS traffic**.
+
+Everything related to:
+
+- Web servers
+- Reverse proxy
+- Load balancing
+- Caching
+- Headers
+- SSL
+- Logging
+
+… goes inside the `http` block.
+
+---
+
+# 🔹 Context hierarchy in NGINX
+
+NGINX config works in layers:
+
+```
+main
+ ├── events
+ └── http
+       ├── server
+       │     └── location
+       └── upstream
 ```
 
-Provides the configuration file context in which the HTTP server directives are specified.
+### 1️⃣ main context
 
-## Reference
+Global settings (worker processes, etc.)
 
-- [https://nginx.org/en/docs/http/ngx_http_core_module.html#http](https://nginx.org/en/docs/http/ngx_http_core_module.html#http)
+### 2️⃣ events context
 
+Connection processing settings.
+
+### 3️⃣ http context
+
+Defines HTTP server behavior.
+
+### 4️⃣ server context
+
+Virtual host (like Apache VirtualHost).
+
+### 5️⃣ location context
+
+URL routing rules.
+
+---
+
+# 🔹 In AWS / GCP deployments
+
+The `http` block is where you typically configure:
+
+### Reverse proxy to
+
+- EC2 instance backends
+- ECS services
+- EKS services
+- GKE services
+- Cloud Run services
+- Internal load balancers
+
+Example:
+
+```nginx
+http {
+    upstream backend {
+        server 10.0.1.10:8080;
+        server 10.0.1.11:8080;
+    }
+
+    server {
+        listen 80;
+
+        location / {
+            proxy_pass http://backend;
+        }
+    }
+}
+```
+
+---
+
+# 🔹 If you're troubleshooting
+
+Common issues related to `http` block:
+
+- Misplaced directives (wrong context)
+- SSL defined outside `http`
+- `upstream` defined outside `http`
+- `server` block defined in wrong file
+- Missing `include /etc/nginx/conf.d/*.conf;`
+
+---

@@ -1,17 +1,110 @@
 ---
-title: "Nginx $upstream_http_name"
-tags: [Nginx]
-date: 2024-03-12
-summary: keep server response header fields.
+title: 'NGINX $upstream_http_name'
+tags: [NGINX]
+date: 2026-02-13
 ---
+
+In **Nginx**, the variable:
+
+```
+$upstream_http_<name>
+```
+
+is used to access a **response header returned by the upstream server** (backend).
+
+So specifically:
 
 ```
 $upstream_http_name
-
-keep server response header fields. For example, the “Server” response header field is available through the $upstream_http_server variable. The rules of converting header field names to variable names are the same as for the variables that start with the “$http_” prefix. Only the header fields from the response of the last server are saved.
 ```
 
+means:
 
-## Reference
+👉 “The value of the `Name` HTTP response header sent by the upstream server.”
 
-- [https://nginx.org/en/docs/http/ngx_http_upstream_module.html#variables](https://nginx.org/en/docs/http/ngx_http_upstream_module.html#variables)
+---
+
+## 🔹 How It Works
+
+When Nginx proxies a request (using `proxy_pass`, `fastcgi_pass`, etc.), the backend returns response headers like:
+
+```
+HTTP/1.1 200 OK
+Content-Type: application/json
+X-Request-ID: abc123
+Name: my-service
+```
+
+You can access those headers in Nginx using:
+
+```
+$upstream_http_content_type
+$upstream_http_x_request_id
+$upstream_http_name
+```
+
+Rules:
+
+- Header names are **lowercased**
+- Dashes (`-`) become underscores (`_`)
+- Prefixed with `upstream_http_`
+
+---
+
+## 🔹 Example Usage
+
+### 1️⃣ Logging an upstream header
+
+```nginx
+log_format custom '$remote_addr - $upstream_http_name';
+
+access_log /var/log/nginx/access.log custom;
+```
+
+---
+
+### 2️⃣ Passing upstream header to client
+
+```nginx
+location / {
+    proxy_pass http://backend;
+
+    add_header X-Backend-Name $upstream_http_name;
+}
+```
+
+---
+
+### 3️⃣ Conditional logic
+
+```nginx
+if ($upstream_http_name = "internal-service") {
+    return 403;
+}
+```
+
+---
+
+## 🔹 Important Notes
+
+- It only works **after a successful upstream response**
+- If the upstream doesn’t return the header → variable is empty
+- Works with:
+
+  - `proxy_pass`
+  - `fastcgi_pass`
+  - `uwsgi_pass`
+  - `grpc_pass`
+
+---
+
+## 🔹 Related Variables
+
+| Variable              | Meaning                                 |
+| --------------------- | --------------------------------------- |
+| `$http_name`          | Request header from client              |
+| `$sent_http_name`     | Response header sent by Nginx to client |
+| `$upstream_http_name` | Response header from upstream           |
+
+---
+

@@ -1,190 +1,151 @@
 ---
-title: "Nginx add_header"
-tags: [Nginx]
-date: 2026-01-05
+title: 'NGINX add_header'
+tags: [NGINX]
+date: 2026-02-13
 ---
 
-```
-In **Nginx**, `add_header` is used to **add HTTP response headers** (for security, caching, CORS, debugging, etc.).
-
-Below is a **clear, practical guide** with common pitfalls and best practices.
+The `add_header` directive in **NGINX** is used to add HTTP response headers to responses sent to clients.
 
 ---
 
-## Basic syntax
+## 🔹 Basic Syntax
 
 ```nginx
-add_header <header-name> <value> [always];
+add_header name value [always];
 ```
+
+- **name** → Header name (e.g., `X-Frame-Options`)
+- **value** → Header value
+- **always** (optional) → Ensures header is added even on non-2xx responses
+
+---
+
+## 🔹 Example 1: Add Security Headers
+
+```nginx
+server {
+    listen 80;
+
+    add_header X-Frame-Options "SAMEORIGIN";
+    add_header X-Content-Type-Options "nosniff";
+    add_header X-XSS-Protection "1; mode=block";
+}
+```
+
+---
+
+## 🔹 Example 2: Add CORS Header
+
+```nginx
+location /api/ {
+    add_header Access-Control-Allow-Origin "*";
+}
+```
+
+---
+
+## 🔹 Important: Behavior Without `always`
+
+By default, `add_header` **only applies to successful responses**:
+
+- 200
+- 201
+- 204
+- 206
+- 301
+- 302
+- 303
+- 304
+- 307
+- 308
+
+If your backend returns a **401, 403, or 500**, the header will NOT be added unless you use `always`.
 
 Example:
 
 ```nginx
-add_header X-Custom-Header "Hello World";
+add_header X-Test "value" always;
 ```
 
-This adds to the **response headers** sent to the client.
+This is especially important for:
+
+- CORS headers (for 401/403 errors)
+- Security headers
+- Custom debugging headers
 
 ---
 
-## ⚠️ Important rule (most people get this wrong)
-
-> **`add_header` only applies to successful responses (2xx, 3xx) by default**
-
-That means **404 / 500 / 401 responses will NOT include the header** unless you use `always`.
-
-### Correct way (recommended)
+## 🔹 Example 3: Add Header for All Responses (Recommended for CORS)
 
 ```nginx
-add_header X-Frame-Options "DENY" always;
-```
-
----
-
-## Scope & inheritance (VERY important)
-
-`add_header` **does NOT inherit** the way you might expect.
-
-### Rule
-
-* If **any `add_header` exists at a lower level**, **all parent `add_header`s are ignored**
-
-Hierarchy:
-
-```
-http
- └── server
-      └── location
-```
-
-### ❌ Common mistake
-
-```nginx
-server {
-    add_header X-A "A";
-
-    location / {
-        add_header X-B "B";
-    }
-}
-```
-
-**Result** in `/`:
-
-* ❌ `X-A` is **missing**
-* ✅ Only `X-B` exists
-
-### ✅ Correct way
-
-```nginx
-server {
-    add_header X-A "A";
-
-    location / {
-        add_header X-A "A";
-        add_header X-B "B";
-    }
+location / {
+    add_header Access-Control-Allow-Origin "*" always;
+    add_header Access-Control-Allow-Methods "GET, POST, OPTIONS" always;
 }
 ```
 
 ---
 
-## Common real-world examples
+## 🔹 Inheritance Behavior (Very Important)
 
-### 1. Security headers
+NGINX **does NOT merge** `add_header` directives automatically.
+
+If you define `add_header` in a `location` block, it overrides headers defined in `server` or `http`.
+
+Example:
 
 ```nginx
-add_header X-Frame-Options "DENY" always;
-add_header X-Content-Type-Options "nosniff" always;
-add_header Referrer-Policy "strict-origin-when-cross-origin" always;
-add_header Content-Security-Policy "default-src 'self'" always;
+server {
+    add_header X-Global "1";
+
+    location /api {
+        add_header X-API "2";  # X-Global will NOT be included here
+    }
+}
+```
+
+To keep both, you must repeat them:
+
+```nginx
+location /api {
+    add_header X-Global "1";
+    add_header X-API "2";
+}
 ```
 
 ---
 
-### 2. CORS headers
+## 🔹 Common AWS / GCP Use Case
+
+If you're using:
+
+- **AWS ALB + NGINX**
+- **GCP Load Balancer + NGINX**
+- **API Gateway behind NGINX**
+- **Cloud Armor in front**
+
+You often need:
 
 ```nginx
 add_header Access-Control-Allow-Origin "*" always;
-add_header Access-Control-Allow-Methods "GET, POST, OPTIONS" always;
-add_header Access-Control-Allow-Headers "Authorization, Content-Type" always;
 ```
 
-For **OPTIONS preflight**:
-
-```nginx
-if ($request_method = OPTIONS) {
-    add_header Content-Length 0;
-    add_header Content-Type text/plain;
-    return 204;
-}
-```
+Otherwise, browsers will block 401/403 responses.
 
 ---
 
-### 3. Disable caching
+## 🔹 Debugging Tip
 
-```nginx
-add_header Cache-Control "no-store, no-cache, must-revalidate, proxy-revalidate" always;
-add_header Pragma "no-cache" always;
-add_header Expires "0" always;
+To verify headers:
+
+```bash
+curl -I https://example.com
+```
+
+Or for error responses:
+
+```bash
+curl -I -X OPTIONS https://example.com/api
 ```
 
 ---
-
-### 4. Debug / inspection header
-
-```nginx
-add_header X-Served-By $hostname always;
-```
-
----
-
-## Overriding or removing headers
-
-### Replace a header
-
-Just redefine it:
-
-```nginx
-add_header Cache-Control "max-age=3600" always;
-```
-
-### Remove headers (needs `headers_more` module)
-
-```nginx
-more_clear_headers Server;
-more_clear_headers X-Powered-By;
-```
-
----
-
-## `proxy_set_header` ≠ `add_header`
-
-This is a **very common confusion**:
-
-| Directive          | Purpose                                     |
-| ------------------ | ------------------------------------------- |
-| `add_header`       | Adds headers to **response sent to client** |
-| `proxy_set_header` | Sets headers **sent to upstream server**    |
-
-Example:
-
-```nginx
-proxy_set_header X-Forwarded-For $remote_addr;
-```
-
-⬆️ This does **not** affect client response headers.
-
----
-
-## Quick checklist (best practice)
-
-✅ Always use `always`
-✅ Repeat headers at each level where you use `add_header`
-✅ Put global headers at `server` or `http` level
-❌ Don’t assume inheritance
-❌ Don’t confuse with `proxy_set_header`
-
----
-

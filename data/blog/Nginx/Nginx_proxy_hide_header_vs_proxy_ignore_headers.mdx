@@ -1,0 +1,197 @@
+---
+title: 'NGINX proxy_hide_header vs proxy_ignore_headers'
+tags: [NGINX]
+date: 2026-02-13
+---
+
+---
+
+# 🔎 Core Difference
+
+| Directive              | What It Affects               | Purpose                                                       |
+| ---------------------- | ----------------------------- | ------------------------------------------------------------- |
+| `proxy_hide_header`    | **Response to client**        | Hide specific headers from being sent to the client           |
+| `proxy_ignore_headers` | **NGINX internal processing** | Ignore certain upstream headers so NGINX does not act on them |
+
+---
+
+# 1️⃣ `proxy_hide_header`
+
+### 👉 Controls what the CLIENT sees
+
+It removes headers from the response before NGINX sends it to the client.
+
+### Example
+
+Backend returns:
+
+```
+X-Powered-By: Express
+Cache-Control: no-cache
+```
+
+NGINX:
+
+```nginx
+location / {
+    proxy_pass http://backend;
+    proxy_hide_header X-Powered-By;
+}
+```
+
+### Result
+
+Client will NOT see:
+
+```
+X-Powered-By
+```
+
+But:
+
+- NGINX still processes it normally.
+- It only hides it from client output.
+
+---
+
+# 2️⃣ `proxy_ignore_headers`
+
+### 👉 Controls what NGINX itself obeys
+
+It tells NGINX:
+
+> "Pretend this upstream header does not exist."
+
+It does NOT automatically hide it from client.
+
+---
+
+## Common Use Case: Caching
+
+Backend returns:
+
+```
+Cache-Control: no-cache
+Set-Cookie: session=abc
+```
+
+Normally:
+
+- NGINX will not cache because of `no-cache`
+- NGINX will not cache because of `Set-Cookie`
+
+If you want to ignore backend cache restrictions:
+
+```nginx
+location / {
+    proxy_pass http://backend;
+    proxy_cache mycache;
+    proxy_ignore_headers Cache-Control Set-Cookie;
+}
+```
+
+Now:
+
+- NGINX ignores those headers internally
+- NGINX may cache anyway
+
+⚠️ The headers may still be sent to the client unless you also hide them.
+
+---
+
+# 🔥 Practical Comparison
+
+## Scenario: Backend sends `Cache-Control: no-cache`
+
+### With `proxy_hide_header Cache-Control;`
+
+- Client does NOT see Cache-Control
+- NGINX still respects it internally
+- NGINX still won’t cache
+
+---
+
+### With `proxy_ignore_headers Cache-Control;`
+
+- NGINX ignores it internally
+- NGINX may cache response
+- Client STILL sees Cache-Control unless hidden
+
+---
+
+# 💡 When You Need BOTH
+
+Sometimes you want:
+
+1. Ignore backend header internally
+2. Hide it from client
+
+```nginx
+location / {
+    proxy_pass http://backend;
+    proxy_cache mycache;
+
+    proxy_ignore_headers Cache-Control Set-Cookie;
+    proxy_hide_header Cache-Control;
+    proxy_hide_header Set-Cookie;
+}
+```
+
+---
+
+# 🧠 Simple Mental Model
+
+- `proxy_hide_header` → Cosmetic (client-facing)
+- `proxy_ignore_headers` → Behavioral (NGINX logic)
+
+---
+
+# 📌 Headers That `proxy_ignore_headers` Can Control
+
+Common ones:
+
+- `X-Accel-Redirect`
+- `X-Accel-Expires`
+- `X-Accel-Limit-Rate`
+- `Cache-Control`
+- `Expires`
+- `Set-Cookie`
+- `Vary`
+
+---
+
+# 🚀 Real AWS Example
+
+If you're using:
+
+**CloudFront → ALB → NGINX → App**
+
+And your app sends:
+
+```
+Cache-Control: private
+Set-Cookie: session
+```
+
+But you want NGINX to cache and CloudFront to cache:
+
+You’d likely use:
+
+```nginx
+proxy_ignore_headers Cache-Control Set-Cookie;
+proxy_hide_header Set-Cookie;
+```
+
+---
+
+# ⚠️ Important Warning
+
+Ignoring headers like `Set-Cookie` while caching can cause:
+
+- Session leakage
+- Users seeing other users’ data
+- Major security incidents
+
+Be very careful with `proxy_ignore_headers`.
+
+---

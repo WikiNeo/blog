@@ -1,57 +1,160 @@
 ---
-title: 'Nginx location'
-tags: [Nginx]
-date: 2024-03-08
+title: 'NGINX location'
+tags: [NGINX]
+date: 2026-02-13
 ---
 
-```
-Syntax:  location [ = | ~ | ~* | ^~ ] uri { ... }
-   location @name { ... }
-Default: —
-Context: server, location
-```
+In **NGINX**, a `location` block is used to define how requests for specific URIs should be processed. It is configured inside a `server` block.
 
-Sets configuration depending on a request URI.
+---
 
-The matching is performed against a normalized URI, after decoding the text encoded in the “%XX” form, resolving references to relative path components “.” and “..”, and possible compression of two or more adjacent slashes into a single slash.
+## Basic Syntax
 
-A location can either be defined by a prefix string, or by a regular expression. Regular expressions are specified with the preceding “~\*” modifier (for case-insensitive matching), or the “~” modifier (for case-sensitive matching). To find location matching a given request, nginx first checks locations defined using the prefix strings (prefix locations). Among them, the location with the longest matching prefix is selected and remembered. Then regular expressions are checked, in the order of their appearance in the configuration file. The search of regular expressions terminates on the first match, and the corresponding configuration is used. If no match with a regular expression is found then the configuration of the prefix location remembered earlier is used.
+```nginx
+server {
+    listen 80;
+    server_name example.com;
 
-location blocks can be nested, with some exceptions mentioned below.
-
-For case-insensitive operating systems such as macOS and Cygwin, matching with prefix strings ignores a case (0.7.7). However, comparison is limited to one-byte locales.
-
-Regular expressions can contain captures (0.7.40) that can later be used in other directives.
-
-If the longest matching prefix location has the “^~” modifier then regular expressions are not checked.
-
-Also, using the “=” modifier it is possible to define an exact match of URI and location. If an exact match is found, the search terminates. For example, if a “/” request happens frequently, defining “location = /” will speed up the processing of these requests, as search terminates right after the first comparison. Such a location cannot obviously contain nested locations.
-
-```shell
-location = / {
-    [ configuration A ]
-}
-
-location / {
-    [ configuration B ]
-}
-
-location /documents/ {
-    [ configuration C ]
-}
-
-location ^~ /images/ {
-    [ configuration D ]
-}
-
-location ~* \.(gif|jpg|jpeg)$ {
-    [ configuration E ]
+    location / {
+        root /var/www/html;
+        index index.html;
+    }
 }
 ```
 
-The “/” request will match configuration A, the “/index.html” request will match configuration B, the “/documents/document.html” request will match configuration C, the “/images/1.gif” request will match configuration D, and the “/documents/1.jpg” request will match configuration E.
+---
 
-## Reference
+# 🔹 Location Matching Types
 
-- [https://nginx.org/en/docs/http/ngx_http_core_module.html#location](https://nginx.org/en/docs/http/ngx_http_core_module.html#location)
+NGINX selects a `location` block based on specific matching rules.
 
+## 1️⃣ Prefix Match (Most Common)
+
+```nginx
+location /images/ {
+    root /data;
+}
+```
+
+- Matches any request starting with `/images/`
+- Example: `/images/logo.png`
+
+---
+
+## 2️⃣ Exact Match (`=`)
+
+```nginx
+location = /favicon.ico {
+    access_log off;
+}
+```
+
+- Matches **exactly** `/favicon.ico`
+- Highest priority
+
+---
+
+## 3️⃣ Regex Match (`~` and `~*`)
+
+### Case-Sensitive
+
+```nginx
+location ~ \.php$ {
+    fastcgi_pass unix:/run/php/php8.1-fpm.sock;
+}
+```
+
+### Case-Insensitive
+
+```nginx
+location ~* \.(jpg|jpeg|png|gif)$ {
+    expires 30d;
+}
+```
+
+---
+
+## 4️⃣ Prefix Match with `^~`
+
+```nginx
+location ^~ /static/ {
+    root /var/www/static;
+}
+```
+
+- If this matches, **NGINX stops searching regex locations**
+- Useful for performance optimization
+
+---
+
+# 🔹 Location Selection Priority (Very Important)
+
+NGINX follows this order:
+
+1. `=` (Exact match)
+2. `^~` (Prefix match, skip regex)
+3. Regex (`~`, `~*`) — first match wins
+4. Longest prefix match (normal `/path/`)
+
+---
+
+# 🔹 Example (API + Static + PHP)
+
+```nginx
+server {
+    listen 80;
+    server_name example.com;
+
+    location = /health {
+        return 200 "OK";
+    }
+
+    location ^~ /static/ {
+        root /var/www/app;
+    }
+
+    location ~ \.php$ {
+        include fastcgi_params;
+        fastcgi_pass unix:/run/php/php8.1-fpm.sock;
+    }
+
+    location / {
+        proxy_pass http://backend;
+    }
+}
+```
+
+---
+
+# 🔹 Common Use Cases in AWS / GCP
+
+Since you're working with **AWS & GCP**, common scenarios include:
+
+### Reverse Proxy to Backend (EC2, ECS, GKE)
+
+```nginx
+location /api/ {
+    proxy_pass http://backend-service;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+}
+```
+
+### Health Check Endpoint (for ALB / GCP Load Balancer)
+
+```nginx
+location = /health {
+    access_log off;
+    return 200 "healthy";
+}
+```
+
+### Serving Static Files from S3 (via proxy)
+
+```nginx
+location /assets/ {
+    proxy_pass https://my-bucket.s3.amazonaws.com;
+}
+```
+
+---

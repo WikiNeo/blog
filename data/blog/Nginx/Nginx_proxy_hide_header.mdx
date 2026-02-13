@@ -1,19 +1,153 @@
 ---
-title: "Nginx proxy_hide_header"
-tags: [Nginx]
-date: 2024-03-07
-summary: By default, nginx does not pass the header fields “Date”, “Server”, “X-Pad”, and “X-Accel-.
+title: 'NGINX proxy_hide_header'
+tags: [NGINX]
+date: 2026-02-13
 ---
 
+`proxy_hide_header` is an **NGINX directive** used to prevent specific response headers from being passed from the upstream server (backend) to the client.
+
+It’s commonly used in reverse proxy setups.
+
+---
+
+## 🔹 What It Does
+
+When NGINX proxies a request to a backend (via `proxy_pass`), the backend returns response headers.
+
+By default, NGINX forwards most of those headers to the client.
+
+`proxy_hide_header` tells NGINX:
+
+> "Do NOT send this specific header to the client."
+
+---
+
+## 🔹 Syntax
+
+```nginx
+proxy_hide_header <header_name>;
+```
+
+---
+
+## 🔹 Example
+
+### Backend returns:
 
 ```
-Syntax:		proxy_hide_header field;
-Default:	—
-Context:	http, server, location
+Server: Apache/2.4.54
+X-Powered-By: PHP/8.2
 ```
 
-By default, nginx does not pass the header fields “Date”, “Server”, “X-Pad”, and “X-Accel-...” from the response of a proxied server to a client. The proxy_hide_header directive sets additional fields that will not be passed.
+### NGINX config:
 
-## Reference
+```nginx
+location / {
+    proxy_pass http://backend;
+    proxy_hide_header X-Powered-By;
+    proxy_hide_header Server;
+}
+```
 
-- [https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_hide_header](https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_hide_header)
+### Result to client:
+
+Those headers will NOT be visible.
+
+---
+
+## 🔹 Common Use Cases
+
+### 1️⃣ Security Hardening
+
+Hide internal technology details:
+
+```nginx
+proxy_hide_header X-Powered-By;
+proxy_hide_header Server;
+```
+
+### 2️⃣ Remove Cache Headers from Backend
+
+```nginx
+proxy_hide_header Cache-Control;
+proxy_hide_header Expires;
+```
+
+Then define your own caching behavior.
+
+### 3️⃣ Override Location Header (Redirect Control)
+
+Sometimes used together with:
+
+```nginx
+proxy_redirect
+```
+
+---
+
+## 🔹 Important Notes
+
+### 1️⃣ Default Hidden Headers
+
+NGINX already hides some headers by default:
+
+- `Date`
+- `Server`
+- `X-Pad`
+- `X-Accel-*`
+
+If you want to allow them, use:
+
+```nginx
+proxy_pass_header Server;
+```
+
+---
+
+### 2️⃣ Context
+
+Can be used inside:
+
+- `http`
+- `server`
+- `location`
+
+---
+
+### 3️⃣ Does NOT Modify Backend
+
+It only affects what is sent to the client.
+The backend response remains unchanged.
+
+---
+
+## 🔹 Related Directives
+
+| Directive              | Purpose                                |
+| ---------------------- | -------------------------------------- |
+| `proxy_set_header`     | Modify request headers sent to backend |
+| `proxy_pass_header`    | Allow hidden headers                   |
+| `proxy_ignore_headers` | Ignore certain headers from backend    |
+| `add_header`           | Add response headers                   |
+
+---
+
+## 🔹 Quick Real-World Example (Common in AWS ALB → NGINX → App)
+
+If your backend (like a Java or Node app on EC2/EKS) leaks:
+
+```
+X-Powered-By: Express
+```
+
+You can hide it at NGINX layer before traffic goes through CloudFront or ALB:
+
+```nginx
+location / {
+    proxy_pass http://app;
+    proxy_hide_header X-Powered-By;
+}
+```
+
+---
+
