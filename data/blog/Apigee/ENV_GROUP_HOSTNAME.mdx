@@ -1,0 +1,162 @@
+---
+title: 'ENV_GROUP_HOSTNAME in Apigee'
+tags: [Apigee]
+date: 2026-02-19
+---
+
+In **GCP Apigee (especially Apigee X / Hybrid)**, `ENV_GROUP_HOSTNAME` refers to the **hostname attached to an Environment Group**.
+
+Let’s break it down clearly:
+
+---
+
+## 🔹 What is an Environment Group in Apigee?
+
+An **Environment Group** is a logical grouping of Apigee environments that share:
+
+- The same **virtual host configuration**
+- The same **domain name(s)**
+- The same **load balancer**
+
+Think of it like:
+
+```
+Custom Domain  →  Environment Group  →  Environments (dev / test / prod)
+```
+
+---
+
+## 🔹 What is `ENV_GROUP_HOSTNAME`?
+
+`ENV_GROUP_HOSTNAME` is the **fully qualified domain name (FQDN)** assigned to the Environment Group.
+
+Example:
+
+```bash
+api.company.com
+```
+
+This hostname:
+
+- Is configured in Apigee
+- Is mapped to a Google Cloud Load Balancer
+- Routes traffic to environments inside that environment group
+
+---
+
+## 🔹 Where You See `ENV_GROUP_HOSTNAME`
+
+You’ll see it in:
+
+### 1️⃣ Apigee CLI / gcloud commands
+
+Example:
+
+```bash
+gcloud apigee envgroups create my-env-group \
+  --hostnames=api.company.com
+```
+
+Or:
+
+```bash
+gcloud apigee envgroups describe my-env-group
+```
+
+Output includes:
+
+```json
+"hostnames": [
+  "api.company.com"
+]
+```
+
+That hostname is your `ENV_GROUP_HOSTNAME`.
+
+---
+
+### 2️⃣ Apigee Hybrid installation (Helm values.yaml)
+
+You may see:
+
+```yaml
+envGroup:
+  name: my-env-group
+  hostnames:
+    - api.company.com
+```
+
+---
+
+## 🔹 How It Works in Traffic Flow
+
+```
+Client → api.company.com
+       ↓
+Google Cloud Load Balancer
+       ↓
+Apigee Environment Group
+       ↓
+Specific Environment (prod/dev)
+       ↓
+API Proxy
+```
+
+---
+
+## 🔹 Important Notes
+
+### ✅ Multiple hostnames allowed
+
+You can attach multiple domains:
+
+```bash
+--hostnames=api.company.com,api2.company.com
+```
+
+---
+
+### ❗ DNS Requirement
+
+You must configure DNS:
+
+```
+api.company.com → External IP of Apigee Load Balancer
+```
+
+---
+
+### ❗ Certificate Requirement
+
+If using HTTPS (recommended), you must:
+
+- Upload SSL certificate
+- Attach it to load balancer
+
+---
+
+## 🔹 Quick Comparison
+
+| Term               | Meaning                                      |
+| ------------------ | -------------------------------------------- |
+| Environment        | Logical API deployment space                 |
+| Environment Group  | Collection of environments sharing hostname  |
+| ENV_GROUP_HOSTNAME | Domain name mapped to that environment group |
+
+---
+
+## 🔹 Typical Real-World Example
+
+Production:
+
+```bash
+ENV_GROUP_HOSTNAME=api.company.com
+```
+
+Non-prod:
+
+```bash
+ENV_GROUP_HOSTNAME=api-dev.company.com
+```
+
+---
