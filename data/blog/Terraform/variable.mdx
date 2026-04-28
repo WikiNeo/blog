@@ -1,0 +1,112 @@
+---
+title: 'Terraform Variables'
+tags: [Terraform]
+date: 2026-04-28
+---
+
+In Terraform, a **variable** is a way to parameterize your configuration so you can reuse the same code with different inputs instead of hardcoding values.
+
+Think of variables like function arguments in programming—they let you pass data into your Terraform configuration.
+
+---
+
+## 🔹 Basic Example
+
+```hcl
+variable "instance_type" {
+  description = "EC2 instance type"
+  type        = string
+  default     = "t2.micro"
+}
+```
+
+You can then use it like this:
+
+```hcl
+resource "aws_instance" "example" {
+  ami           = "ami-123456"
+  instance_type = var.instance_type
+}
+```
+
+---
+
+## 🔹 Key Components
+
+A variable block can include:
+
+- **type** → Defines expected data type (`string`, `number`, `bool`, `list`, `map`, etc.)
+- **default** → Optional fallback value
+- **description** → Helps document usage
+- **validation** → Optional rules for allowed values
+
+Example with validation:
+
+```hcl
+variable "environment" {
+  type = string
+
+  validation {
+    condition     = contains(["dev", "prod"], var.environment)
+    error_message = "Environment must be dev or prod."
+  }
+}
+```
+
+---
+
+## 🔹 Ways to Assign Values
+
+Terraform variables can be set in multiple ways (priority order):
+
+1. **Command line flags**
+
+   ```bash
+   terraform apply -var="instance_type=t3.medium"
+   ```
+
+2. **.tfvars file**
+
+   ```hcl
+   instance_type = "t3.large"
+   ```
+
+3. **Environment variables**
+
+   ```bash
+   export TF_VAR_instance_type="t3.small"
+   ```
+
+4. **Default value** (inside the variable block)
+
+---
+
+## 🔹 Types of Variables
+
+Terraform supports rich types:
+
+```hcl
+variable "example" {
+  type = object({
+    name = string
+    age  = number
+  })
+}
+```
+
+---
+
+## 🔹 Why Use Variables?
+
+- Reuse configurations across environments (dev, staging, prod)
+- Avoid hardcoding values
+- Make modules flexible and portable
+
+---
+
+## 🔹 Quick Analogy
+
+Terraform variables = **inputs to your infrastructure code**
+Terraform outputs = **results returned from that code**
+
+---

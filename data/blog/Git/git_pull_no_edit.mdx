@@ -1,0 +1,31 @@
+---
+title: 'git pull --no-edit'
+tags: [Git]
+date: 2026-04-23
+---
+
+`git pull --no-edit` is a Git command that:
+
+### What it does
+
+- **`git pull`** = fetches changes from the remote branch and then merges them into your current branch.
+- **`--no-edit`** = tells Git to **skip opening the commit message editor** and automatically use the default merge commit message.
+
+### When it’s useful
+
+Normally, if a merge is required, Git opens your editor so you can edit the merge commit message. With `--no-edit`, it just proceeds directly.
+
+### Example scenario
+
+If your local branch is behind and pulling requires a merge:
+
+```bash
+git pull origin develop --no-edit
+```
+
+→ Git will merge remote changes into your branch and **auto-create the merge commit message**.
+
+### Important notes
+
+- It only matters **when a merge commit is created** (not for fast-forward pulls).
+- If there are **merge conflicts**, you’ll still need to resolve them manually.

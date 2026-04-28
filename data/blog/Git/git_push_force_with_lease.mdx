@@ -1,0 +1,64 @@
+---
+title: 'git push --force-with-lease'
+tags: [Git]
+date: 2026-04-23
+---
+
+`git push --force-with-lease` is the “safer” version of a force push.
+
+### What it does
+
+It force-updates the remote branch **only if** the remote branch is in the state you expect.
+
+In other words:
+
+- It **checks** that no one else has pushed new commits to the remote branch since your last fetch.
+- If the remote has changed → the push is **rejected**.
+- If it hasn’t changed → your force push goes through.
+
+### Why this matters
+
+A plain `git push --force` will overwrite the remote branch **no matter what**, potentially deleting other people’s work.
+
+`--force-with-lease` protects against that.
+
+### Example scenario
+
+1. You and a teammate both work on `feature-branch`
+2. You rewrite history locally (e.g. `rebase`, `commit --amend`)
+3. You run:
+
+   ```
+   git push --force-with-lease
+   ```
+
+- ✅ If no one else pushed → success
+- ❌ If your teammate pushed → Git stops you instead of overwriting their commits
+
+### When to use it
+
+Use `--force-with-lease` when:
+
+- You rebased a branch
+- You amended commits
+- You cleaned up history before merging
+
+### Rule of thumb
+
+If you think you need `--force`, you almost always want:
+
+```
+git push --force-with-lease
+```
+
+### Optional stricter form
+
+You can be explicit about what you expect:
+
+```
+git push --force-with-lease=origin/feature-branch
+```
+
+This tightens the safety check further.
+
+---

@@ -1,0 +1,68 @@
+---
+title: 'Universal Module Definition (UMD)'
+tags: [TypeScript]
+date: 2026-04-23
+---
+
+Universal Module Definition (UMD) is a JavaScript pattern that allows a module to work across different module systems—primarily:
+
+- **CommonJS** (Node.js)
+- **AMD** (Asynchronous Module Definition, used by loaders like RequireJS)
+- **Browser globals** (plain `<script>` usage without a module loader)
+
+### Why UMD exists
+
+Before ES Modules (`import/export`) became standard, the JavaScript ecosystem was fragmented. Different environments used different module systems, so library authors needed a way to make their code portable. UMD solves that by detecting the environment at runtime and exporting the module accordingly.
+
+### Basic idea
+
+A UMD wrapper checks what environment it’s running in and adapts:
+
+```javascript
+;(function (root, factory) {
+  if (typeof define === 'function' && define.amd) {
+    // AMD
+    define([], factory)
+  } else if (typeof module === 'object' && module.exports) {
+    // CommonJS
+    module.exports = factory()
+  } else {
+    // Browser global
+    root.myLibrary = factory()
+  }
+})(this, function () {
+  // Module code here
+  return {
+    hello: function () {
+      return 'Hello, UMD!'
+    },
+  }
+})
+```
+
+### How it works
+
+- **AMD detected** → uses `define`
+- **CommonJS detected** → uses `module.exports`
+- **Otherwise** → attaches to a global variable (e.g., `window.myLibrary`)
+
+### When to use UMD
+
+UMD is mostly **legacy today**, but still useful if:
+
+- You’re maintaining older libraries
+- You need compatibility with older tooling or environments
+
+### Modern alternative
+
+Today, **ES Modules (ESM)** are preferred:
+
+```javascript
+export function hello() {
+  return 'Hello!'
+}
+```
+
+Most modern bundlers (Webpack, Rollup, Vite) can convert ESM into UMD if needed.
+
+---

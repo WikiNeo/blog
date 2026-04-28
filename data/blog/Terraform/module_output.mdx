@@ -1,0 +1,125 @@
+---
+title: 'Terraform module output'
+tags: [Terraform]
+date: 2026-04-28
+---
+
+Outputs are especially useful when working with **modules**, because they let one module **expose values** that another module (or the root configuration) can use.
+
+Think of it like this:
+
+- A module is a “black box”
+- Outputs are the **data it returns**
+
+---
+
+## 🔹 Basic flow across modules
+
+### 1. Child module defines outputs
+
+Inside a module (e.g., `modules/network/outputs.tf`):
+
+```hcl
+output "vpc_id" {
+  value = aws_vpc.main.id
+}
+
+output "subnet_ids" {
+  value = aws_subnet.public[*].id
+}
+```
+
+This exposes the VPC ID and subnet IDs to whoever calls the module.
+
+---
+
+### 2. Root module accesses those outputs
+
+In your main configuration:
+
+```hcl
+module "network" {
+  source = "./modules/network"
+}
+```
+
+You can now use the outputs like this:
+
+```hcl
+module.network.vpc_id
+module.network.subnet_ids
+```
+
+---
+
+### 3. Pass outputs into another module
+
+Now let’s say you have a compute module that needs a VPC:
+
+```hcl
+module "compute" {
+  source = "./modules/compute"
+
+  vpc_id     = module.network.vpc_id
+  subnet_ids = module.network.subnet_ids
+}
+```
+
+👉 Here, the **output of one module becomes the input of another**.
+
+---
+
+## 🔹 Visual idea
+
+```
+[ network module ]
+        │
+        ▼ (outputs)
+   vpc_id, subnet_ids
+        │
+        ▼
+[ compute module ]
+```
+
+---
+
+## 🔹 Inside the receiving module
+
+The `compute` module must define variables:
+
+```hcl
+variable "vpc_id" {}
+variable "subnet_ids" {}
+```
+
+Now it can use them internally:
+
+```hcl
+resource "aws_instance" "app" {
+  subnet_id = var.subnet_ids[0]
+}
+```
+
+---
+
+## 🔹 Optional: Re-expose outputs at root
+
+You can also “bubble up” values:
+
+```hcl
+output "vpc_id" {
+  value = module.network.vpc_id
+}
+```
+
+---
+
+## 🔹 Key takeaway
+
+Outputs across modules enable:
+
+- **Loose coupling** (modules don’t depend on internal details)
+- **Reusability** (modules become plug-and-play)
+- **Clear data flow** (inputs → resources → outputs → next module)
+
+---

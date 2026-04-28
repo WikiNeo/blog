@@ -1,0 +1,95 @@
+---
+title: 'Computed Property Names'
+tags: [TypeScript]
+date: 2026-04-23
+---
+
+In JavaScript (and TypeScript), **computed property names** let you define object property keys dynamically using an expression instead of a fixed name.
+
+### Basic idea
+
+You wrap an expression in square brackets `[]` inside an object literal:
+
+```ts
+const key = 'name'
+
+const obj = {
+  [key]: 'Alice',
+}
+
+console.log(obj.name) // "Alice"
+```
+
+Instead of literally using `"key"` as the property name, it evaluates the variable `key` and uses its value.
+
+---
+
+### More examples
+
+#### 1. Using expressions
+
+```ts
+const prefix = 'user'
+
+const obj = {
+  [`${prefix}_id`]: 123,
+}
+
+console.log(obj.user_id) // 123
+```
+
+#### 2. Dynamic keys in functions
+
+```ts
+function createObject(key: string, value: any) {
+  return {
+    [key]: value,
+  }
+}
+
+const result = createObject('age', 30)
+// { age: 30 }
+```
+
+#### 3. With multiple computed properties
+
+```ts
+const a = 'x'
+const b = 'y'
+
+const obj = {
+  [a]: 1,
+  [b]: 2,
+}
+// { x: 1, y: 2 }
+```
+
+---
+
+### In TypeScript (with types)
+
+You often see computed property names with mapped types:
+
+```ts
+type Keys = 'a' | 'b'
+
+type MyType = {
+  [K in Keys]: number
+}
+
+// Equivalent to:
+// {
+//   a: number;
+//   b: number;
+// }
+```
+
+---
+
+### Important notes
+
+- The expression inside `[]` is evaluated at runtime (for objects).
+- The result must be a string, number, or symbol.
+- If multiple computed keys resolve to the same value, later ones overwrite earlier ones.
+
+---
