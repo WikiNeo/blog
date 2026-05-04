@@ -1,0 +1,70 @@
+---
+title: "Dot escaping \\. vs [.]"
+tags: [RegularExpression]
+date: 2026-05-04
+---
+
+
+They’re effectively the same **in most regex engines**, but they come from different contexts and have slightly different implications.
+
+### 1. `\.` (escaped dot)
+
+* Means: **literal dot**
+* Normally `.` = “any character”, so escaping it removes that special meaning.
+* Works everywhere.
+
+### 2. `[.]` (character class with a dot)
+
+* Also means: **literal dot**
+* Inside a character class (`[...]`), most metacharacters lose their special meaning — including `.`
+
+---
+
+### Key differences
+
+**Readability / intent**
+
+* `\.` → clearly “I’m escaping a metacharacter”
+* `[.]` → looks like a set (even though it only has one char)
+
+**Escaping layers (like HCL, JSON, etc.)**
+
+* In HCL or other string-escaped contexts:
+
+  * `\.` often becomes `"\\."` (double escape needed)
+  * `[.]` stays `"[.]"` (no escaping needed)
+
+👉 This is the main practical reason people use `[.]` — fewer backslashes.
+
+**Behavior edge cases**
+
+* In *most* regex engines: identical match behavior
+* Rare edge cases:
+
+  * Inside some complex character class logic (like nested or POSIX classes), `[.]` behaves like a class, not a literal escape
+  * But for simple use: no difference
+
+---
+
+### Rule of thumb
+
+* Use `\.` when writing normal regex
+* Use `[.]` when:
+
+  * escaping is annoying (HCL, Terraform, JSON, etc.)
+  * you want cleaner strings with fewer backslashes
+
+---
+
+### Example (HCL)
+
+```hcl
+# annoying
+pattern = "\\."
+
+# cleaner
+pattern = "[.]"
+```
+
+---
+
