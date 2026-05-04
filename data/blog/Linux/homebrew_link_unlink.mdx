@@ -1,0 +1,85 @@
+---
+title: "Homebrew link and unlink"
+tags: [Linux]
+date: 2026-05-04
+---
+
+
+In Homebrew, `link` and `unlink` control whether a package’s files are symlinked into your main Homebrew prefix (so they’re available on your PATH).
+
+### 🔗 `brew link`
+
+Creates symlinks for a package into `/usr/local` (Intel) or `/opt/homebrew` (Apple Silicon), making it the active version.
+
+```bash
+brew link <formula>
+```
+
+**Common uses:**
+
+* Activate a specific version after installing multiple versions
+* Fix “command not found” after install
+
+**Example:**
+
+```bash
+brew link python@3.11
+```
+
+---
+
+### 🔓 `brew unlink`
+
+Removes those symlinks, effectively deactivating the package (without uninstalling it).
+
+```bash
+brew unlink <formula>
+```
+
+**Common uses:**
+
+* Avoid conflicts between versions
+* Temporarily disable a tool
+
+**Example:**
+
+```bash
+brew unlink python@3.11
+```
+
+---
+
+### ⚖️ Switching between versions
+
+A typical workflow:
+
+```bash
+brew unlink python@3.12
+brew link python@3.11
+```
+
+---
+
+### ⚠️ Helpful flags
+
+* Force linking even if conflicts exist:
+
+  ```bash
+  brew link --force <formula>
+  ```
+* Overwrite conflicting files:
+
+  ```bash
+  brew link --overwrite <formula>
+  ```
+
+---
+
+### 🧠 Quick mental model
+
+* `install` = download files
+* `link` = make them usable
+* `unlink` = hide them (but keep installed)
+
+---
+
