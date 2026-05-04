@@ -1,0 +1,231 @@
+---
+title: "Capturing and Non-Capturing Groups in Google Cloud Armor"
+tags: [RegularExpression]
+date: 2026-05-04
+---
+
+In regular expressions, **capturing groups** and **non-capturing groups** both let you group parts of a pattern—but they behave differently when it comes to *storing matches*.
+
+---
+
+## 🔹 Capturing Groups `( ... )`
+
+**Syntax:**
+
+```
+(...)
+```
+
+**What they do:**
+
+* Group parts of a regex together
+* **Capture (store)** the matched text for later use
+
+**Why it matters:**
+
+* You can reference captured groups:
+
+  * In the same regex (backreferences like `\1`)
+  * In replacement strings
+  * In your code (e.g., `match.group(1)`)
+
+**Example:**
+
+```
+(\d{4})-(\d{2})-(\d{2})
+```
+
+Matches a date like `2026-05-04` and captures:
+
+* Group 1 → `2026`
+* Group 2 → `05`
+* Group 3 → `04`
+
+---
+
+## 🔹 Non-Capturing Groups `(?: ... )`
+
+**Syntax:**
+
+```
+(?:...)
+```
+
+**What they do:**
+
+* Group parts of a regex
+* **Do NOT store** the matched text
+
+**Why use them:**
+
+* Slightly more efficient (no memory for storing groups)
+* Keeps group numbering clean
+* Useful when grouping is needed only for structure (e.g., alternation)
+
+**Example:**
+
+```
+(?:cat|dog)s
+```
+
+Matches:
+
+* `cats`
+* `dogs`
+
+But does **not** create a capture group for `cat` or `dog`.
+
+---
+
+## 🔑 Key Differences
+
+| Feature            | Capturing `( )` | Non-Capturing `(?: )` |
+| ------------------ | --------------- | --------------------- |
+| Groups expressions | ✅               | ✅                     |
+| Stores match       | ✅               | ❌                     |
+| Can be referenced  | ✅               | ❌                     |
+| Affects numbering  | ✅               | ❌                     |
+
+---
+
+## 🧠 When to Use Which
+
+* Use **capturing groups** when you need to:
+
+  * Extract data
+  * Reuse matched text
+  * Perform replacements
+
+* Use **non-capturing groups** when you:
+
+  * Just need grouping (e.g., `a(?:b|c)d`)
+  * Want cleaner group indices
+  * Care about performance in large patterns
+
+---
+
+## ⚡ Quick Example Comparison
+
+Pattern:
+
+```
+(ha)+
+```
+
+Matches `"hahaha"` and captures `"ha"`
+
+Pattern:
+
+```
+(?:ha)+
+```
+
+Matches `"hahaha"` but captures nothing
+
+---
+
+In **Google Cloud Armor**, the distinction between **capturing vs non-capturing groups** matters less for “retrieving values” (like in programming), and more for **performance, readability, and rule behavior**.
+
+Cloud Armor uses **RE2 regex**, which has some important constraints:
+
+* ❌ No backreferences (`\1`, `\2`, etc.)
+* ❌ No lookbehind
+* ✅ Supports capturing and non-capturing groups—but **captured values aren’t usable later**
+
+---
+
+## 🔹 So what actually changes in Cloud Armor?
+
+### 1. **Capturing groups don’t give you extra power**
+
+In typical regex engines, you might do:
+
+```regex
+(user|admin)/\1
+```
+
+➡️ Not allowed in RE2 (Cloud Armor), because **backreferences aren’t supported**
+
+So:
+
+* Capturing groups **don’t let you reuse matches**
+* They’re mostly just grouping with *overhead*
+
+---
+
+### 2. **Performance impact (small but real)**
+
+Capturing groups:
+
+```regex
+(cat|dog)
+```
+
+Non-capturing groups:
+
+```regex
+(?:cat|dog)
+```
+
+In Cloud Armor:
+
+* Capturing groups require the engine to **track match boundaries**
+* Non-capturing groups skip that
+
+👉 At scale (high QPS, many rules), this can matter:
+
+* Slightly faster evaluation
+* Less memory overhead
+
+---
+
+### 3. **Best practice in Cloud Armor**
+
+Since you **can’t use captured values anyway**, the recommendation is:
+
+👉 **Use non-capturing groups by default**
+
+```regex
+(?:login|signup|reset)
+```
+
+Instead of:
+
+```regex
+(login|signup|reset)
+```
+
+---
+
+### 4. **Clarity and maintainability**
+
+Non-capturing groups signal intent:
+
+* “This is just grouping, not extraction”
+
+That’s helpful when you (or teammates) revisit rules later.
+
+---
+
+## 🔑 Bottom line
+
+In Cloud Armor:
+
+* Capturing groups = mostly unnecessary
+* Non-capturing groups = preferred
+* Functional behavior = **identical for matching**
+* Difference = **performance + intent clarity**
+
+---
+
+## ⚡ Example in a Cloud Armor rule
+
+```yaml
+expression: request.path.matches('^/(?:api|admin|internal)/.*')
+```
+
+✔ Groups paths
+✔ No wasted capture tracking
+✔ Clean and efficient
+
+---

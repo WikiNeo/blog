@@ -1,0 +1,46 @@
+---
+title: "JS Regular Expression /./g"
+tags: [RegularExpression]
+date: 2026-05-04
+---
+
+In JavaScript, the regex:
+
+```
+/./g
+```
+
+means:
+
+* `/.../` → regex literal
+* `.` → matches **any single character** (except line breaks by default)
+* `g` → **global flag**, meaning “find all matches”, not just the first one
+
+### What it does
+
+It matches **every character in a string, one by one**.
+
+### Example
+
+```js
+const str = "hello";
+const matches = str.match(/./g);
+
+console.log(matches);
+// ["h", "e", "l", "l", "o"]
+```
+
+### Notes
+
+* It does **not** match newline characters (`\n`) unless you use the `s` (dotAll) flag:
+
+  ```js
+  /./gs
+  ```
+
+* Without `g`, it would only return the **first character**:
+
+  ```js
+  "hello".match(/./) // ["h"]
+  ```
+
