@@ -1,0 +1,202 @@
+---
+title: "go mod vendor"
+tags: [Golang]
+date: 2026-06-22
+---
+
+`go mod vendor` copies all the dependencies required by your module into a local `vendor/` directory.
+
+For example:
+
+```bash
+go mod vendor
+```
+
+creates:
+
+```text
+myproject/
+├── go.mod
+├── go.sum
+├── vendor/
+│   ├── github.com/
+│   ├── golang.org/
+│   └── modules.txt
+└── main.go
+```
+
+## Why use vendoring?
+
+Normally Go downloads dependencies from the module cache:
+
+```text
+$GOPATH/pkg/mod
+```
+
+With vendoring, your project contains its own copy of the dependency source code.
+
+Benefits:
+
+### 1. Fully self-contained builds
+
+A build can succeed without internet access:
+
+```bash
+go build -mod=vendor
+```
+
+Useful for:
+
+* Air-gapped environments
+* Enterprise environments
+* Long-term archival
+
+---
+
+### 2. Reproducible builds
+
+You know exactly which dependency source code was used.
+
+Even if:
+
+* a repository disappears
+* a proxy is unavailable
+* a Git host is down
+
+the build still works.
+
+---
+
+### 3. Easier code auditing
+
+Security-sensitive organizations often want all third-party code checked into the repository.
+
+You can inspect:
+
+```text
+vendor/github.com/gin-gonic/gin/
+vendor/golang.org/x/net/
+```
+
+directly.
+
+---
+
+## What is `vendor/modules.txt`?
+
+Example:
+
+```txt
+# github.com/gin-gonic/gin v1.9.1
+## explicit
+github.com/gin-gonic/gin
+```
+
+This file records:
+
+* which modules were vendored
+* their versions
+* whether they were direct or indirect dependencies
+
+Go uses it to verify consistency with `go.mod`.
+
+---
+
+## How Go chooses dependencies
+
+### Go 1.14+
+
+If a `vendor/` directory exists and is consistent:
+
+```bash
+go build
+```
+
+may automatically use the vendor directory.
+
+To be explicit:
+
+```bash
+go build -mod=vendor
+```
+
+To ignore vendor:
+
+```bash
+go build -mod=mod
+```
+
+---
+
+## Typical workflow
+
+After changing dependencies:
+
+```bash
+go get github.com/gin-gonic/gin@latest
+go mod tidy
+go mod vendor
+```
+
+Commit:
+
+```text
+go.mod
+go.sum
+vendor/
+```
+
+to Git.
+
+---
+
+## When should you use it?
+
+### Usually NO
+
+Most modern Go projects do **not** vendor dependencies.
+
+They commit only:
+
+```text
+go.mod
+go.sum
+```
+
+Examples:
+
+* Kubernetes (historically yes, now transitioning in parts)
+* Docker/Moby (varies by component)
+* Most open-source Go libraries
+
+Go's module proxy system is generally reliable enough.
+
+---
+
+### Consider vendoring when
+
+* Building in isolated environments
+* Strict compliance/security requirements
+* Long-lived enterprise software
+* Reproducibility is more important than repository size
+
+---
+
+## Difference between `go.sum` and `vendor/`
+
+| Feature              | `go.sum` | `vendor/` |
+| -------------------- | -------- | --------- |
+| Stores source code?  | No       | Yes       |
+| Stores checksums?    | Yes      | No        |
+| Makes build offline? | No       | Yes       |
+| Small file?          | Yes      | No        |
+| Usually committed?   | Yes      | Depends   |
+| Required?            | Yes      | No        |
+
+A useful mental model:
+
+* `go.mod` → what versions you need
+* `go.sum` → verify downloaded code
+* `vendor/` → keep a local copy of the actual code
+
+Most Go projects today use **`go.mod` + `go.sum` only**, and reserve `go mod vendor` for special deployment or compliance requirements.
