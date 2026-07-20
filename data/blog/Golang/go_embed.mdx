@@ -1,0 +1,102 @@
+---
+title: "//go:embed template"
+tags: [Golang]
+date: 2026-06-22
+---
+
+This Go code embeds files from your project into the compiled binary.
+
+```go
+import "embed"
+
+//go:embed templates
+var embeddedTemplates embed.FS
+```
+
+What it means:
+
+`import "embed"` enables Go’s built-in embedding feature.
+
+`//go:embed templates` tells the Go compiler to include the `templates` directory in the final binary.
+
+`var embeddedTemplates embed.FS` stores those embedded files in an `embed.FS`, which behaves like a read-only filesystem.
+
+Example project:
+
+```text
+myapp/
+  main.go
+  templates/
+    index.html
+    layout.html
+```
+
+Example usage:
+
+```go
+package main
+
+import (
+	"embed"
+	"fmt"
+	"log"
+)
+
+//go:embed templates
+var embeddedTemplates embed.FS
+
+func main() {
+	data, err := embeddedTemplates.ReadFile("templates/index.html")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println(string(data))
+}
+```
+
+Important detail: the path passed to `ReadFile` includes `templates/`.
+
+So this works:
+
+```go
+embeddedTemplates.ReadFile("templates/index.html")
+```
+
+But this does not:
+
+```go
+embeddedTemplates.ReadFile("index.html")
+```
+
+unless you embed the files differently.
+
+A common pattern with HTML templates:
+
+```go
+package main
+
+import (
+	"embed"
+	"html/template"
+	"net/http"
+)
+
+//go:embed templates
+var embeddedTemplates embed.FS
+
+func main() {
+	tmpl := template.Must(template.ParseFS(
+		embeddedTemplates,
+		"templates/*.html",
+	))
+
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		tmpl.ExecuteTemplate(w, "index.html", nil)
+	})
+
+	http.ListenAndServe(":8080", nil)
+}
+```
+
+This is useful because your app can run without needing a separate `templates` folder next to the executable. The template files are baked into the binary at build time.

@@ -1,0 +1,94 @@
+---
+title: "go.mod"
+tags: [Golang]
+date: 2026-06-22
+---
+
+`go.mod` is the **module definition file** for a Go project.
+
+It tells Go:
+
+1. **What your module is called**
+2. **Which Go version your project targets**
+3. **Which dependencies your project needs**
+4. **Which versions of those dependencies to use**
+
+A simple `go.mod` looks like this:
+
+```go
+module github.com/you/myapp
+
+go 1.22
+
+require (
+    github.com/gin-gonic/gin v1.10.0
+    golang.org/x/text v0.14.0
+)
+```
+
+Here:
+
+```go
+module github.com/you/myapp
+```
+
+means your project’s module path is `github.com/you/myapp`.
+
+```go
+go 1.22
+```
+
+means this module targets Go 1.22 language/toolchain behavior.
+
+```go
+require github.com/gin-gonic/gin v1.10.0
+```
+
+means your project depends on version `v1.10.0` of `gin`.
+
+## Why `go.mod` exists
+
+Before Go modules, Go projects usually had to live inside `GOPATH`, and dependency management was less convenient.
+
+With `go.mod`, a Go project can live almost anywhere, and Go knows exactly how to resolve its dependencies.
+
+## Common commands
+
+Create a `go.mod` file:
+
+```bash
+go mod init github.com/you/myapp
+```
+
+Add or update dependencies automatically:
+
+```bash
+go mod tidy
+```
+
+Download dependencies:
+
+```bash
+go mod download
+```
+
+Show all dependencies:
+
+```bash
+go list -m all
+```
+
+## Relationship with `go.sum`
+
+`go.mod` says **what dependencies and versions your project uses**.
+
+`go.sum` records **cryptographic checksums** so Go can verify that downloaded dependency code has not changed unexpectedly.
+
+So usually:
+
+```text
+go.mod  = dependency list and module metadata
+go.sum  = dependency integrity verification
+```
+
+In short, `go.mod` is like the `package.json` of a Go project, but simpler and more strict.

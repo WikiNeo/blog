@@ -1,0 +1,76 @@
+---
+title: "git merge vs rebease"
+tags: [Git]
+date: 2026-07-20
+---
+
+**Merge** and **rebase** both combine Git histories, but they do it differently.
+
+### Merge
+
+```bash
+git switch main
+git merge feature
+```
+
+Git creates a merge commit that joins the two branches:
+
+```text
+A---B---C main
+     \   \
+      D---E---M
+```
+
+**Advantages**
+
+* Preserves the true branch history.
+* Safe for shared branches.
+* Does not rewrite existing commits.
+
+**Trade-off**
+
+* Can produce many merge commits and a noisier history.
+
+### Rebase
+
+```bash
+git switch feature
+git rebase main
+```
+
+Git moves the feature commits so they appear to have been created from the latest `main`:
+
+```text
+A---B---C main
+         \
+          D'---E' feature
+```
+
+**Advantages**
+
+* Produces a clean, linear history.
+* Makes logs and `git bisect` easier to follow.
+
+**Trade-off**
+
+* Rewrites commit history: `D` and `E` become new commits `D'` and `E'`.
+* Can require resolving conflicts commit by commit.
+
+### Practical rule
+
+Use **rebase** to update your own local feature branch:
+
+```bash
+git switch feature
+git fetch origin
+git rebase origin/main
+```
+
+Use **merge** when combining shared or already-published history:
+
+```bash
+git switch main
+git merge feature
+```
+
+Avoid rebasing commits that other people may already be using. A common workflow is: **rebase locally, then merge or fast-forward into `main`**.
