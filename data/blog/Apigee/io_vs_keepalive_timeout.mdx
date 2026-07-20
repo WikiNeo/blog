@@ -1,0 +1,63 @@
+---
+title: "io.timeout.millis vs keepalive.timeout.millis in Apigee"
+tags: [Apigee]
+date: 2026-07-20
+---
+
+In Apigee, these properties control **different phases of a target connection**:
+
+| Property                   | What it controls                                                                           |
+| -------------------------- | ------------------------------------------------------------------------------------------ |
+| `io.timeout.millis`        | How long Apigee waits while **sending a request to or reading a response from the target** |
+| `keepalive.timeout.millis` | How long an **idle reusable connection** remains in the connection pool                    |
+
+### `io.timeout.millis`
+
+This is an active request timeout.
+
+```xml
+<HTTPTargetConnection>
+  <Properties>
+    <Property name="io.timeout.millis">30000</Property>
+  </Properties>
+  <URL>https://backend.example.com</URL>
+</HTTPTargetConnection>
+```
+
+With `30000`, Apigee waits up to 30 seconds for socket read/write activity from the backend. A target read timeout generally produces a `504 Gateway Timeout`. The documented default is commonly 55 seconds. ([Google Cloud Documentation][1])
+
+### `keepalive.timeout.millis`
+
+This controls connection reuse **after a request has completed**.
+
+```xml
+<Properties>
+  <Property name="keepalive.timeout.millis">60000</Property>
+</Properties>
+```
+
+With `60000`, an unused target connection may remain open for 60 seconds so that a later request can reuse it rather than creating a new TCP/TLS connection. It does **not** determine how long Apigee waits for the current backend response. ([Apigee Docs][2])
+
+### Example
+
+Suppose:
+
+```text
+io.timeout.millis        = 30000
+keepalive.timeout.millis = 60000
+```
+
+A backend request may wait up to 30 seconds for I/O. After the request finishes, the connection can stay idle in the pool for up to 60 seconds.
+
+A useful rule:
+
+```text
+io.timeout.millis = request/response waiting time
+keepalive.timeout.millis = idle connection reuse time
+```
+
+Avoid setting `keepalive.timeout.millis` to `0` unless necessary, because that disables persistent connection reuse and can increase TCP/TLS connection overhead. ([Google Cloud Documentation][3])
+
+[1]: https://docs.cloud.google.com/apigee/docs/api-platform/reference/endpoint-properties-reference?utm_source=chatgpt.com "Endpoint properties reference | Apigee - Google Cloud"
+[2]: https://docs.apigee.com/how-to-guides/configuring-keep-alive-timeout-on-message-processors?utm_source=chatgpt.com "Configuring keep alive timeout on Message Processors"
+[3]: https://docs.cloud.google.com/apigee/docs/api-platform/antipatterns/disable-persistent-connections?utm_source=chatgpt.com "Antipattern: Disable HTTP persistent (reusable keep-alive) connections"
