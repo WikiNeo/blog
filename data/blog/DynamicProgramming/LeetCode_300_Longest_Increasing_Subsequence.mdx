@@ -2,74 +2,599 @@
 title: "[LeetCode 300] Longest Increasing Subsequence"
 tags: [DynamicProgramming]
 date: 2022-06-03
-summary: increasing subsequence.
 ---
 
-## Problem
+## Application
 
-Given an integer array `nums`, return the length of the longest strictly
-increasing subsequence.
+The **Longest Increasing Subsequence (LIS)** problem is useful because it models a surprisingly common idea:
 
-A **subsequence** is a sequence that can be derived from an array by deleting some
-or no elements without changing the order of the remaining elements. For
-example, `[3,6,2,7]` is a subsequence of the array `[0,3,1,6,2,2,7]`.
+> **Find the largest set of items that can be kept in their original order while maintaining some increasing relationship.**
 
-### Example 1:
+The "increasing" part doesn't have to literally mean numbers. It can represent time, priority, version, position, quality, etc.
 
-```
-Input: nums = [10,9,2,5,3,7,101,18]
-Output: 4
-Explanation: The longest increasing subsequence is [2,3,7,101], therefore the length is 4.
-```
+### 1. Version / dependency ordering
 
-### Example 2:
+Suppose you have software versions encountered in some order:
 
-```
-Input: nums = [0,1,0,3,2,3]
-Output: 4
+```text
+1, 3, 2, 4, 6, 5
 ```
 
-### Example 3:
+You might want the longest sequence of versions that is monotonically increasing:
 
-```
-Input: nums = [7,7,7,7,7,7,7]
-Output: 1
-```
- 
-#### Constraints:
-
-- `1 <= nums.length <= 2500`
-- `-10^4 <= nums[i] <= 10^4`
- 
-#### Follow up: 
-
-- Can you come up with an algorithm that runs in `O(n log(n))` time complexity?
-
-## Thoughts
-
-- Bottom up dynamic programming
-
-## TypeScript
-
-```typescript
-function lengthOfLIS(nums: number[]): number {
-    const LIS: number[] = Array(nums.length).fill(1);
-    
-    // move backward
-    for(let i = nums.length - 1; i >= 0; i--){
-        // check all the following values
-        for(let j = i + 1; j < nums.length; j++){
-            // dynamic programming condition
-            if(nums[i] < nums[j]){
-                LIS[i] = Math.max(LIS[i], 1 + LIS[j])
-            }
-        }
-    }
-    
-    return Math.max(...LIS)
-};
+```text
+1, 2, 4, 6
 ```
 
-## Reference
+This can be useful when analysing whether a sequence of events follows a consistent progression.
 
-- [https://leetcode.com/problems/longest-increasing-subsequence/](https://leetcode.com/problems/longest-increasing-subsequence/)
+---
+
+### 2. Sorting with minimum changes
+
+A very important application is determining **how many elements need to be removed to make a sequence increasing**.
+
+For example:
+
+```text
+5 1 4 2 3 6
+```
+
+One LIS is:
+
+```text
+1 2 3 6
+```
+
+Its length is 4.
+
+There are 6 elements, so:
+
+```text
+6 - 4 = 2
+```
+
+You only need to remove **2 elements** to make the remaining sequence increasing.
+
+This generalises to:
+
+> **Minimum deletions to make a sequence sorted = n − LIS**
+
+This comes up frequently in scheduling and data processing.
+
+---
+
+### 3. Scheduling
+
+Imagine jobs arrive in this order:
+
+```text
+Job:       A  B  C  D  E
+Deadline:  3  1  4  2  5
+```
+
+If you want to find the largest subset of jobs whose deadlines can be handled in increasing order, you're essentially looking for an LIS.
+
+More sophisticated scheduling problems often reduce to LIS after transforming the data.
+
+---
+
+### 4. Comparing two versions of something
+
+This is one of the more interesting applications.
+
+Suppose two versions of a document contain the same items but in different orders.
+
+You can map items in one version to their positions in the other:
+
+```text
+Version A:
+A B C D E
+
+Version B:
+B A D C E
+```
+
+Map A's elements to their positions in B:
+
+```text
+A B C D E
+2 1 4 3 5
+```
+
+The LIS is:
+
+```text
+1, 3, 5
+```
+
+corresponding to:
+
+```text
+B, D, E
+```
+
+So LIS can help identify the **largest portion that remains in relative order**.
+
+This idea is related to algorithms for **diff**, file comparison, and sequence alignment.
+
+---
+
+### 5. 2D problems
+
+LIS becomes especially powerful when combined with sorting.
+
+Suppose you have envelopes:
+
+```text
+(width, height)
+
+(5, 4)
+(6, 4)
+(6, 7)
+(2, 3)
+(7, 8)
+```
+
+You want to find the maximum number that can be nested inside each other.
+
+This is the famous **Russian Doll Envelopes** problem.
+
+You can:
+
+1. Sort by width.
+2. Transform the problem into finding an LIS of heights.
+
+For example, after appropriate sorting:
+
+```text
+heights:
+3 4 4 7 8
+```
+
+Then LIS gives the maximum nesting depth.
+
+This technique appears in many competitive-programming problems involving **2D/3D ordering**.
+
+---
+
+### 6. Stock / financial data analysis
+
+Given prices:
+
+```text
+10 8 11 7 13 9 15
+```
+
+LIS can find the longest period-like subsequence where prices continually increase:
+
+```text
+8 11 13 15
+```
+
+It isn't normally the right algorithm for finding the best investment return, but it can be useful for analysing **monotonic trends**.
+
+---
+
+### 7. Computer vision / pattern recognition
+
+LIS-like algorithms can be used to detect ordered structures in noisy data.
+
+For example, if points are expected to follow an increasing spatial relationship:
+
+```text
+(x1, y1)
+(x2, y2)
+...
+```
+
+you can transform the problem into an LIS to find the largest set of points that preserves the expected ordering.
+
+---
+
+## Why LIS is worth learning
+
+The biggest value of LIS isn't the literal problem itself. It's the **pattern**.
+
+When you see something like:
+
+> "Find the largest subset that maintains its original order and satisfies some monotonic relationship."
+
+you should think:
+
+**Can this be reduced to LIS?**
+
+And there is a particularly important transformation:
+
+```text
+Original problem
+      ↓
+Sort / map / transform
+      ↓
+1-dimensional sequence
+      ↓
+LIS
+```
+
+That's why LIS appears much more often in algorithms than you might initially expect.
+
+### The key algorithms
+
+There are two common implementations:
+
+| Approach                |     Complexity | When useful                                  |
+| ----------------------- | -------------: | -------------------------------------------- |
+| DP                      |          O(n²) | Learning, small n                            |
+| Binary search / "tails" | **O(n log n)** | Large n, interviews, competitive programming |
+
+The `O(n log n)` version is particularly worth understanding because the technique—maintaining a `tails` array and using binary search—is itself a useful algorithmic pattern.
+
+The key to the **O(n log n)** LIS algorithm is that we don't actually store the LIS itself. Instead, we maintain the **smallest possible ending value** for an increasing subsequence of each length.
+
+### 1. The idea
+
+Consider:
+
+```python
+nums = [10, 9, 2, 5, 3, 7, 101, 18]
+```
+
+We maintain an array called `tails`.
+
+`tails[i]` means:
+
+> The **smallest possible last value** of an increasing subsequence of length `i + 1`.
+
+Process the numbers one by one.
+
+---
+
+### 2. Start with 10
+
+```text
+10
+```
+
+We have an increasing subsequence of length 1:
+
+```text
+tails = [10]
+```
+
+Meaning:
+
+```text
+length 1 → smallest ending value = 10
+```
+
+---
+
+### 3. Process 9
+
+We already have:
+
+```text
+[10]
+```
+
+Can we make a length-1 subsequence ending in something smaller than 10?
+
+Yes: `9`.
+
+So replace 10:
+
+```text
+tails = [9]
+```
+
+This doesn't mean the LIS is `[9]`. It means:
+
+> If I want a subsequence of length 1, ending at 9 is better than ending at 10.
+
+A smaller ending gives us more opportunities to extend it later.
+
+---
+
+### 4. Process 2
+
+Same idea:
+
+```text
+tails = [2]
+```
+
+Now we have the best possible length-1 subsequence:
+
+```text
+[2]
+```
+
+---
+
+### 5. Process 5
+
+We can extend `[2]`:
+
+```text
+[2, 5]
+```
+
+So:
+
+```text
+tails = [2, 5]
+```
+
+Interpretation:
+
+```text
+length 1 → smallest ending = 2
+length 2 → smallest ending = 5
+```
+
+---
+
+### 6. Process 3
+
+Here's where binary search becomes important.
+
+We have:
+
+```text
+tails = [2, 5]
+```
+
+We want to place `3`.
+
+We find the **first element >= 3**.
+
+That's `5`.
+
+Replace it:
+
+```text
+tails = [2, 3]
+```
+
+Why?
+
+Because:
+
+```text
+[2, 3]
+```
+
+is a length-2 increasing subsequence, and ending at `3` is better than ending at `5`.
+
+Now we have:
+
+```text
+length 2 → can end at 3
+```
+
+That's much more promising than ending at 5.
+
+---
+
+### 7. Process 7
+
+`7` is greater than everything in `tails`:
+
+```text
+[2, 3]
+```
+
+So append:
+
+```text
+tails = [2, 3, 7]
+```
+
+We now know there is an increasing subsequence of length 3.
+
+---
+
+### 8. Process 101
+
+Again, bigger than everything:
+
+```text
+tails = [2, 3, 7, 101]
+```
+
+---
+
+### 9. Process 18
+
+Find the first element ≥ 18:
+
+```text
+[2, 3, 7, 101]
+          ↑
+```
+
+Replace 101:
+
+```text
+tails = [2, 3, 7, 18]
+```
+
+The final length is:
+
+```text
+4
+```
+
+So the LIS length is **4**.
+
+One actual LIS is:
+
+```text
+[2, 3, 7, 101]
+```
+
+or
+
+```text
+[2, 3, 7, 18]
+```
+
+---
+
+## The binary search
+
+The important operation is:
+
+> Find the first position where `tails[pos] >= x`.
+
+This is called **lower_bound**.
+
+In Python:
+
+```python
+from bisect import bisect_left
+
+def length_of_lis(nums):
+    tails = []
+
+    for x in nums:
+        i = bisect_left(tails, x)
+
+        if i == len(tails):
+            tails.append(x)
+        else:
+            tails[i] = x
+
+    return len(tails)
+```
+
+The crucial line is:
+
+```python
+i = bisect_left(tails, x)
+```
+
+For example:
+
+```text
+tails = [2, 3, 7, 18]
+x = 5
+```
+
+Binary search finds:
+
+```text
+[2, 3, 7, 18]
+       ↑
+```
+
+because `7` is the first value ≥ `5`.
+
+Then:
+
+```python
+tails[2] = 5
+```
+
+giving:
+
+```text
+[2, 3, 5, 18]
+```
+
+Again, we're making the ending value as small as possible.
+
+---
+
+## Why is this O(n log n)?
+
+For every number:
+
+```text
+x
+↓
+binary search
+↓
+find position in tails
+↓
+replace/append
+```
+
+`tails` has at most `n` elements.
+
+Binary search takes:
+
+```text
+O(log n)
+```
+
+and we do it `n` times:
+
+```text
+O(n log n)
+```
+
+Space:
+
+```text
+O(n)
+```
+
+---
+
+## The subtle part
+
+This is the part that often confuses people:
+
+**`tails` is not necessarily an actual subsequence.**
+
+For example, during processing you might have:
+
+```text
+tails = [2, 3, 7, 18]
+```
+
+That happens to be a valid subsequence here, but in general `tails` should be thought of as:
+
+> **The best possible tail values for subsequences of different lengths.**
+
+The important invariant is:
+
+```text
+tails[0] = smallest tail for length 1
+tails[1] = smallest tail for length 2
+tails[2] = smallest tail for length 3
+...
+```
+
+Therefore `tails` is always sorted, which is exactly **why binary search is possible**.
+
+### The mental model
+
+I find this the easiest way to remember the algorithm:
+
+> **For every possible subsequence length, keep its ending value as small as possible.**
+
+A smaller tail is always better:
+
+```text
+length 3 ending at 10
+             ↓
+length 3 ending at 7
+```
+
+The second one has more possibilities for extension.
+
+So LIS becomes:
+
+```text
+maintain best tails
+        ↓
+binary search where x belongs
+        ↓
+replace the tail
+        ↓
+if x is bigger than all tails → extend LIS
+```
+
+One especially useful next step is to understand **why `bisect_left` is correct and when you should use `bisect_right` instead**—that's the difference between solving *strictly increasing* and *non-decreasing* subsequence problems.
