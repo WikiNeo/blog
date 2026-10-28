@@ -1,0 +1,50 @@
+---
+title: 'Python 3 mutable default argument issue'
+tags: [Python]
+date: 2026-10-07
+---
+
+In Python, a **mutable default argument** can cause surprising behavior because default arguments are evaluated **once, when the function is defined**, not each time it is called.
+
+```python
+def add_item(item, items=[]):
+    items.append(item)
+    return items
+
+print(add_item("a"))  # ['a']
+print(add_item("b"))  # ['a', 'b']  ← surprise
+print(add_item("c"))  # ['a', 'b', 'c']
+```
+
+The same `items` list is reused across calls.
+
+### Correct pattern
+
+Use `None` as the default and create the mutable object inside the function:
+
+```python
+def add_item(item, items=None):
+    if items is None:
+        items = []
+
+    items.append(item)
+    return items
+
+print(add_item("a"))  # ['a']
+print(add_item("b"))  # ['b']
+```
+
+This issue applies to mutable objects such as `list`, `dict`, and `set`:
+
+```python
+# Bad
+def f(x, cache={}):
+    ...
+
+# Usually safer
+def f(x, cache=None):
+    if cache is None:
+        cache = {}
+```
+
+One nuance: mutable defaults aren't inherently invalid. Sometimes persistent state is intentional—for example, a deliberately shared cache. The bug occurs when you **expect a fresh object on every call**.
