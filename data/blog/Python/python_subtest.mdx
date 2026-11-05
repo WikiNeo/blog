@@ -1,0 +1,74 @@
+---
+title: 'Python unittest subTest'
+tags: [Python]
+date: 2026-11-05
+summary: Isolate failures inside a loop without stopping the rest of the test.
+---
+
+`subTest()` is a context manager on `unittest.TestCase` that lets you run
+several related checks inside a single test method while still getting a
+separate, independently reported failure for each one.
+
+## The problem without subTest
+
+Without `subTest`, a loop that checks multiple values stops at the first
+failure, hiding any other failing cases in the same run.
+
+```python
+import unittest
+
+class TestEven(unittest.TestCase):
+    def test_even_numbers(self):
+        for i in range(0, 6, 2):
+            self.assertEqual(i % 2, 1)  # intentionally wrong, fails on i=0
+```
+
+Running this reports only **one** failure (`i = 0`) and the test stops;
+you never find out whether `i = 2` or `i = 4` would have also failed.
+
+## Using subTest
+
+Wrap the per-iteration assertion in `self.subTest(...)`. Each iteration is now
+tracked independently, so one failure doesn't prevent the others from running
+and being reported.
+
+```python
+import unittest
+
+class TestEven(unittest.TestCase):
+    def test_even_numbers(self):
+        for i in range(0, 6, 2):
+            with self.subTest(i=i):
+                self.assertEqual(i % 2, 1)  # fails every time, on purpose
+```
+
+Output now reports a separate `FAIL` for `i=0`, `i=2`, and `i=4`, each
+labeled with the keyword arguments passed to `subTest`:
+
+```text
+FAIL: test_even_numbers (__main__.TestEven) (i=0)
+FAIL: test_even_numbers (__main__.TestEven) (i=2)
+FAIL: test_even_numbers (__main__.TestEven) (i=4)
+```
+
+## Why this matters
+
+- **Better diagnostics**: you see every failing case in one run instead of
+  fixing one, re-running, and finding the next.
+- **No extra test methods**: you avoid writing `test_case_1`, `test_case_2`,
+  etc. for what is really one parameterized check.
+- **Works with any identifying info**: pass whatever keyword arguments help
+  identify the failing iteration, e.g. `self.subTest(value=v, expected=e)`.
+
+## Caveats
+
+- A `subTest` block still counts toward the enclosing test's pass/fail
+  status — if any sub-test fails, the whole test method is reported as
+  failed.
+- Errors (exceptions other than `AssertionError`) inside a `subTest` block
+  still propagate normally and can abort the rest of the loop, depending on
+  the exception.
+
+## Reference
+
+- [https://docs.python.org/3/library/unittest.html#distinguishing-test-iterations-using-subtests](https://docs.python.org/3/library/unittest.html#distinguishing-test-iterations-using-subtests)
