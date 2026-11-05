@@ -1,0 +1,41 @@
+---
+description: Require comments in code snippets within blog posts
+globs: data/blog/**/*.mdx
+alwaysApply: false
+---
+
+# Comment Code Snippets in Blog Posts
+
+Code blocks inside blog posts (`data/blog/**/*.mdx`) must include comments
+that explain non-obvious lines or the overall intent of the snippet — not
+just a caption above/below the block.
+
+```python
+# ❌ BAD — no comments, reader has to infer intent
+def extended_gcd(a, b):
+    if b == 0:
+        return a, 1, 0
+    d, x1, y1 = extended_gcd(b, a % b)
+    x, y = y1, x1 - (a // b) * y1
+    return d, x, y
+```
+
+```python
+# ✅ GOOD — comments explain what's happening and why
+def extended_gcd(a, b):
+    if b == 0:
+        return a, 1, 0  # base case: gcd(a, 0) = a
+    d, x1, y1 = extended_gcd(b, a % b)
+    # back-substitute to express d as a*x + b*y
+    x, y = y1, x1 - (a // b) * y1
+    return d, x, y
+```
+
+Guidelines:
+
+- Comment the **why**, not just the **what** — avoid restating the line in English.
+- Keep comments short (inline `#`/`//` comments are usually enough).
+- Don't over-comment trivial lines (e.g. `x = x + 1  # increment x`); focus on
+  tricky logic, edge cases, and anything a reader would need explained.
+- Applies to code blocks in new posts and whenever an existing post's code
+  blocks are edited.

@@ -12,6 +12,7 @@ A single `*` before a parameter name collects any extra positional arguments int
 
 ```python
 def total(*args):
+    # args is a tuple of every positional argument passed in
     return sum(args)
 
 total(1, 2, 3)  # 6
@@ -23,6 +24,7 @@ A double `**` before a parameter name collects any extra keyword arguments into 
 
 ```python
 def describe(**kwargs):
+    # kwargs is a dict of every keyword argument passed in
     for key, value in kwargs.items():
         print(f"{key} = {value}")
 
@@ -37,10 +39,11 @@ A lone `*` (not attached to a parameter) doesn't collect anything itself. It mar
 
 ```python
 def connect(host, port, *, timeout=30):
+    # bare * means everything after it (timeout) must be keyword-only
     ...
 
 connect("localhost", 8080, timeout=5)   # OK
-connect("localhost", 8080, 5)           # TypeError
+connect("localhost", 8080, 5)           # TypeError: timeout can't be positional
 ```
 
 This is useful for forcing callers to be explicit, which avoids ambiguous calls where it's unclear what a positional value means.
@@ -51,6 +54,7 @@ As a complement to `*`, a `/` marks parameters before it as positional-only (the
 
 ```python
 def power(base, exp, /, *, mod=None):
+    # / closes off base/exp as positional-only; * opens mod as keyword-only
     ...
 
 power(2, 10)              # OK
@@ -66,16 +70,17 @@ def add(a, b, c):
     return a + b + c
 
 args = (1, 2, 3)
-add(*args)          # unpacks tuple into positional args
+add(*args)          # unpacks tuple into positional args: add(1, 2, 3)
 
 kwargs = {"a": 1, "b": 2, "c": 3}
-add(**kwargs)        # unpacks dict into keyword args
+add(**kwargs)        # unpacks dict into keyword args: add(a=1, b=2, c=3)
 ```
 
 ## Putting it together
 
 ```python
 def example(a, b, /, c, d, *, e, f):
+    # a, b: positional-only | c, d: normal | e, f: keyword-only
     print(a, b, c, d, e, f)
 
 example(1, 2, 3, d=4, e=5, f=6)

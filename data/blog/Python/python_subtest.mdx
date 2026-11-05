@@ -19,8 +19,9 @@ import unittest
 
 class TestEven(unittest.TestCase):
     def test_even_numbers(self):
-        for i in range(0, 6, 2):
+        for i in range(0, 6, 2):  # checks i = 0, 2, 4
             self.assertEqual(i % 2, 1)  # intentionally wrong, fails on i=0
+            # execution stops here; i=2 and i=4 are never checked
 ```
 
 Running this reports only **one** failure (`i = 0`) and the test stops;
@@ -38,6 +39,8 @@ import unittest
 class TestEven(unittest.TestCase):
     def test_even_numbers(self):
         for i in range(0, 6, 2):
+            # subTest isolates this iteration: a failure here doesn't
+            # stop the loop, and i is recorded to identify which failed
             with self.subTest(i=i):
                 self.assertEqual(i % 2, 1)  # fails every time, on purpose
 ```

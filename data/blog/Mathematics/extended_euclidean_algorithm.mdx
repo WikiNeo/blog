@@ -1,0 +1,125 @@
+---
+title: "Extended Euclidean Algorithm"
+tags: [Mathematics]
+date: 2026-11-05
+---
+
+## Extended Euclidean Algorithm
+
+The **extended Euclidean algorithm** computes the greatest common divisor of two integers $a$ and $b$, while *also* finding integer coefficients $x, y$ such that
+
+$$
+ax + by = \gcd(a, b)
+$$
+
+This identity is known as **Bézout's identity**, and the extended algorithm finds $x$ and $y$ as a side effect of the ordinary Euclidean algorithm.
+
+---
+
+### The Ordinary Euclidean Algorithm (Recap)
+
+The regular algorithm computes $\gcd(a, b)$ by repeated division:
+
+$$
+\gcd(a, b) = \gcd(b, a \bmod b), \qquad \gcd(a, 0) = a
+$$
+
+It tells you *what* the gcd is, but not *how* to express it as a linear combination of $a$ and $b$.
+
+---
+
+### Extending It
+
+At each recursive step, we track coefficients so that the gcd found at the base case can be "unwound" back up through every step.
+
+Base case:
+
+$$
+a \cdot 1 + 0 \cdot 0 = a \quad \text{when } b = 0
+$$
+
+Recursive step — given a solution for the smaller pair $(b, a \bmod b)$:
+
+$$
+b \cdot x_1 + (a \bmod b) \cdot y_1 = d
+$$
+
+substitute $a \bmod b = a - \left\lfloor \frac{a}{b} \right\rfloor b$:
+
+$$
+d = b x_1 + \left(a - \left\lfloor \frac{a}{b} \right\rfloor b\right) y_1
+  = a \, y_1 + b \left(x_1 - \left\lfloor \frac{a}{b} \right\rfloor y_1\right)
+$$
+
+So the coefficients for $(a, b)$ are:
+
+$$
+x = y_1, \qquad y = x_1 - \left\lfloor \frac{a}{b} \right\rfloor y_1
+$$
+
+---
+
+### Implementation
+
+```python
+def extended_gcd(a, b):
+    if b == 0:
+        return a, 1, 0  # base case: a*1 + 0*0 = a
+    d, x1, y1 = extended_gcd(b, a % b)
+    # unwind: coefficients (x1, y1) solved for (b, a % b); derive (x, y) for (a, b)
+    x, y = y1, x1 - (a // b) * y1
+    return d, x, y
+
+d, x, y = extended_gcd(240, 46)
+print(d, x, y)          # 2 -9 47
+print(240 * x + 46 * y)  # 2  (matches d, confirming Bezout's identity)
+```
+
+An iterative version avoids recursion depth issues for large inputs:
+
+```python
+def extended_gcd_iter(a, b):
+    old_r, r = a, b       # tracks the remainder sequence (gcd ends up in old_r)
+    old_x, x = 1, 0        # tracks coefficients for a, in lockstep with old_r/r
+    old_y, y = 0, 1        # tracks coefficients for b, in lockstep with old_r/r
+    while r != 0:
+        q = old_r // r      # quotient at this step of the division
+        # standard trick to update a running pair (old, new) -> (new, old - q*new)
+        old_r, r = r, old_r - q * r
+        old_x, x = x, old_x - q * x
+        old_y, y = y, old_y - q * y
+    return old_r, old_x, old_y  # gcd, x, y
+```
+
+---
+
+### Worked Example
+
+Find $\gcd(240, 46)$ and coefficients $x, y$.
+
+| Step | $a$ | $b$ | $q = \lfloor a/b \rfloor$ | $r = a \bmod b$ |
+|------|-----|-----|---------------------------|-----------------|
+| 1 | 240 | 46 | 5 | 10 |
+| 2 | 46 | 10 | 4 | 6 |
+| 3 | 10 | 6 | 1 | 4 |
+| 4 | 6 | 4 | 1 | 2 |
+| 5 | 4 | 2 | 2 | 0 |
+
+$\gcd(240, 46) = 2$. Back-substituting gives $x = -9,\ y = 47$:
+
+$$
+240 \cdot (-9) + 46 \cdot 47 = -2160 + 2162 = 2
+$$
+
+---
+
+### Why It Matters
+
+- **Modular inverses**: if $\gcd(a, m) = 1$, then $x$ from $ax + my = 1$ is the modular inverse of $a \pmod m$ — essential for RSA and other cryptographic schemes.
+- **Linear Diophantine equations**: solving $ax + by = c$ relies directly on this algorithm (see the related post on linear Diophantine equations).
+- **Chinese Remainder Theorem**: combining congruences with different moduli uses Bézout coefficients to construct the combined solution.
+
+## Reference
+
+- [https://en.wikipedia.org/wiki/Extended_Euclidean_algorithm](https://en.wikipedia.org/wiki/Extended_Euclidean_algorithm)
+- [https://en.wikipedia.org/wiki/B%C3%A9zout%27s_identity](https://en.wikipedia.org/wiki/B%C3%A9zout%27s_identity)
