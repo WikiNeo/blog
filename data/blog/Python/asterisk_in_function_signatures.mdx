@@ -1,0 +1,90 @@
+---
+title: 'Asterisk (*) usage in Python function signatures'
+tags: [Python]
+date: 2026-11-05
+---
+
+The asterisk (`*`) shows up in several places in a Python function signature, and each usage means something different: collecting extra positional arguments, collecting extra keyword arguments, or forcing arguments to be passed in a particular way.
+
+## `*args` — variadic positional arguments
+
+A single `*` before a parameter name collects any extra positional arguments into a tuple.
+
+```python
+def total(*args):
+    return sum(args)
+
+total(1, 2, 3)  # 6
+```
+
+## `**kwargs` — variadic keyword arguments
+
+A double `**` before a parameter name collects any extra keyword arguments into a dict.
+
+```python
+def describe(**kwargs):
+    for key, value in kwargs.items():
+        print(f"{key} = {value}")
+
+describe(name="Alice", age=30)
+# name = Alice
+# age = 30
+```
+
+## Bare `*` — keyword-only arguments
+
+A lone `*` (not attached to a parameter) doesn't collect anything itself. It marks a boundary: everything after it must be passed as a keyword argument.
+
+```python
+def connect(host, port, *, timeout=30):
+    ...
+
+connect("localhost", 8080, timeout=5)   # OK
+connect("localhost", 8080, 5)           # TypeError
+```
+
+This is useful for forcing callers to be explicit, which avoids ambiguous calls where it's unclear what a positional value means.
+
+## Bare `/` — positional-only arguments (related, not asterisk)
+
+As a complement to `*`, a `/` marks parameters before it as positional-only (they cannot be passed by keyword). Not an asterisk, but often shown alongside it:
+
+```python
+def power(base, exp, /, *, mod=None):
+    ...
+
+power(2, 10)              # OK
+power(base=2, exp=10)     # TypeError, base/exp are positional-only
+```
+
+## Unpacking at the call site
+
+The same symbols also unpack iterables and dicts when *calling* a function, which pairs naturally with the signatures above.
+
+```python
+def add(a, b, c):
+    return a + b + c
+
+args = (1, 2, 3)
+add(*args)          # unpacks tuple into positional args
+
+kwargs = {"a": 1, "b": 2, "c": 3}
+add(**kwargs)        # unpacks dict into keyword args
+```
+
+## Putting it together
+
+```python
+def example(a, b, /, c, d, *, e, f):
+    print(a, b, c, d, e, f)
+
+example(1, 2, 3, d=4, e=5, f=6)
+```
+
+- `a, b` — positional-only (before `/`)
+- `c, d` — normal, can be positional or keyword
+- `e, f` — keyword-only (after `*`)
+
+## Reference
+
+- [https://docs.python.org/3/reference/compound_stmts.html#function-definitions](https://docs.python.org/3/reference/compound_stmts.html#function-definitions)

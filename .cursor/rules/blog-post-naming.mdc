@@ -1,0 +1,23 @@
+---
+description: File naming convention for blog post files
+globs: data/blog/**/*.mdx
+alwaysApply: false
+---
+
+# Blog Post File Naming
+
+Blog post filenames under `data/blog/**` must use `lower_case_with_underscore`
+naming: lowercase letters, digits, and underscores only (no spaces, no
+PascalCase/CamelCase, no hyphens).
+
+```
+# ❌ BAD
+data/blog/Python/Asterisk_In_Function_Signatures.mdx
+data/blog/Python/asterisk-in-function-signatures.mdx
+
+# ✅ GOOD
+data/blog/Python/asterisk_in_function_signatures.mdx
+```
+
+The post `title` in frontmatter can still use normal capitalization/spacing —
+this rule only applies to the filename itself.
